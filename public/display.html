@@ -1,0 +1,332 @@
+    <div id="qrCode"></div>
+    <div id="qrCodeText"></div>
+    <div id="connectionStatus">Waiting for connection...</div>
+    
+    <!-- Leaderboard Component -->
+    <div id="leaderboard" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.95); z-index: 100; overflow: hidden;">
+        <div class="leaderboard-container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; height: 100%; display: flex; flex-direction: column; box-sizing: border-box;">
+            <h1 style="color: #00BFFF; text-align: center; font-size: 4rem; margin-bottom: 30px; text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);">Leaderboard</h1>
+            
+            <div class="leaderboard-content" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+                <div class="leaderboard-header" style="display: flex; padding: 15px 20px; background: rgba(0, 191, 255, 0.1); border-radius: 10px 10px 0 0; margin-bottom: 10px; font-weight: bold; font-size: 1.5rem; color: #00BFFF;">
+                    <div style="flex: 0 0 80px; text-align: center;">Rank</div>
+                    <div style="flex: 1; text-align: left; padding-left: 20px;">Player</div>
+                    <div style="flex: 0 0 150px; text-align: center;">Rounds</div>
+                    <div style="flex: 0 0 150px; text-align: center;">Points</div>
+                </div>
+                
+                <div id="leaderboardList" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+                    <!-- Leaderboard entries will be inserted here -->
+                    <div class="loading-message" style="text-align: center; padding: 40px; color: #00BFFF; font-size: 2rem;">
+                        Loading leaderboard data...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script>
+        // ... existing code ...
+        
+        // Add leaderboard styles
+        const leaderboardStyles = document.createElement('style');
+        leaderboardStyles.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(-20px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(20px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            @keyframes glow {
+                0% { box-shadow: 0 0 5px rgba(0, 191, 255, 0.5); }
+                50% { box-shadow: 0 0 20px rgba(0, 191, 255, 0.8), 0 0 30px rgba(0, 191, 255, 0.6); }
+                100% { box-shadow: 0 0 5px rgba(0, 191, 255, 0.5); }
+            }
+            
+            #leaderboard {
+                animation: fadeIn 0.5s ease-out;
+            }
+            
+            .leaderboard-entry {
+                display: flex;
+                padding: 15px 20px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                font-size: 1.3rem;
+                animation: slideIn 0.3s ease-out;
+                transition: transform 0.2s ease;
+            }
+            
+            .leaderboard-entry:hover {
+                transform: translateX(10px);
+            }
+            
+            .rank-1 {
+                background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1));
+                color: #FFD700;
+                border: 2px solid rgba(255, 215, 0, 0.3);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+                font-weight: bold;
+                animation: glow 2s infinite alternate;
+            }
+            
+            .rank-2 {
+                background: linear-gradient(45deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.1));
+                color: #C0C0C0;
+                border: 2px solid rgba(192, 192, 192, 0.3);
+                box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
+                font-weight: bold;
+            }
+            
+            .rank-3 {
+                background: linear-gradient(45deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1));
+                color: #CD7F32;
+                border: 2px solid rgba(205, 127, 50, 0.3);
+                box-shadow: 0 0 15px rgba(205, 127, 50, 0.2);
+                font-weight: bold;
+            }
+            
+            .rank-other {
+                background: rgba(0, 191, 255, 0.1);
+                color: #E0E0E0;
+                border: 2px solid rgba(0, 191, 255, 0.2);
+                box-shadow: 0 0 10px rgba(0, 191, 255, 0.1);
+            }
+            
+            .rank-badge {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-weight: bold;
+                margin-right: 10px;
+            }
+            
+            .rank-1 .rank-badge {
+                background: rgba(255, 215, 0, 0.3);
+                border: 2px solid rgba(255, 215, 0, 0.5);
+            }
+            
+            .rank-2 .rank-badge {
+                background: rgba(192, 192, 192, 0.3);
+                border: 2px solid rgba(192, 192, 192, 0.5);
+            }
+            
+            .rank-3 .rank-badge {
+                background: rgba(205, 127, 50, 0.3);
+                border: 2px solid rgba(205, 127, 50, 0.5);
+            }
+            
+            .rank-other .rank-badge {
+                background: rgba(0, 191, 255, 0.2);
+                border: 2px solid rgba(0, 191, 255, 0.3);
+            }
+            
+            /* Trophy icons */
+            .trophy {
+                font-size: 1.5rem;
+                margin-left: 10px;
+            }
+            
+            /* Scrollbar styling */
+            #leaderboardList::-webkit-scrollbar {
+                width: 10px;
+            }
+            
+            #leaderboardList::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 5px;
+            }
+            
+            #leaderboardList::-webkit-scrollbar-thumb {
+                background: rgba(0, 191, 255, 0.5);
+                border-radius: 5px;
+            }
+            
+            #leaderboardList::-webkit-scrollbar-thumb:hover {
+                background: rgba(0, 191, 255, 0.7);
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .leaderboard-header, .leaderboard-entry {
+                    font-size: 1rem;
+                    padding: 10px;
+                }
+                
+                .rank-badge {
+                    width: 30px;
+                    height: 30px;
+                }
+            }
+            
+            @media (min-width: 1920px) {
+                .leaderboard-header, .leaderboard-entry {
+                    font-size: 1.8rem;
+                    padding: 20px;
+                }
+                
+                .rank-badge {
+                    width: 50px;
+                    height: 50px;
+                }
+            }
+        `;
+        document.head.appendChild(leaderboardStyles);
+        
+        // ... existing code ...
+        
+        // Function to fetch and display leaderboard
+        function fetchAndDisplayLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboardList');
+            leaderboardList.innerHTML = '<div class="loading-message" style="text-align: center; padding: 40px; color: #00BFFF; font-size: 2rem;">Loading leaderboard data...</div>';
+            
+            // Initialize Firebase if not already initialized
+            if (!firebase.apps.length) {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+                    authDomain: "simplixgymrewards.firebaseapp.com",
+                    databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+                    projectId: "simplixgymrewards",
+                    storageBucket: "simplixgymrewards.appspot.com",
+                    messagingSenderId: "821049711023",
+                    appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+                };
+                firebase.initializeApp(firebaseConfig);
+            }
+            
+            const db = firebase.firestore();
+            
+            // Query users collection, ordered by points in descending order, limited to top 10
+            db.collection('users')
+                .orderBy('points', 'desc')
+                .limit(10)
+                .get()
+                .then((querySnapshot) => {
+                    // Clear loading message
+                    leaderboardList.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        leaderboardList.innerHTML = '<div class="loading-message" style="text-align: center; padding: 40px; color: #00BFFF; font-size: 1.5rem;">No leaderboard data available yet.</div>';
+                        return;
+                    }
+                    
+                    // Process each user document
+                    querySnapshot.docs.forEach((doc, index) => {
+                        const userData = doc.data();
+                        const rank = index + 1;
+                        
+                        // Create leaderboard entry
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+                        entryDiv.style.animationDelay = `${index * 0.1}s`;
+                        
+                        // Determine trophy icon for top 3
+                        let trophyIcon = '';
+                        if (rank === 1) trophyIcon = '🏆';
+                        else if (rank === 2) trophyIcon = '🥈';
+                        else if (rank === 3) trophyIcon = '🥉';
+                        
+                        // Create entry content
+                        entryDiv.innerHTML = `
+                            <div style="flex: 0 0 80px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                <div class="rank-badge">${rank}</div>
+                            </div>
+                            <div style="flex: 1; text-align: left; padding-left: 20px; display: flex; align-items: center;">
+                                ${userData.name || 'Anonymous'} ${trophyIcon ? `<span class="trophy">${trophyIcon}</span>` : ''}
+                            </div>
+                            <div style="flex: 0 0 150px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                ${userData['number-played'] || 0}
+                            </div>
+                            <div style="flex: 0 0 150px; text-align: center; display: flex; align-items: center; justify-content: center;">
+                                ${userData.points || 0}
+                            </div>
+                        `;
+                        
+                        leaderboardList.appendChild(entryDiv);
+                    });
+                    
+                    // Add visual effects for top entries
+                    setTimeout(() => {
+                        const topEntry = leaderboardList.querySelector('.rank-1');
+                        if (topEntry) {
+                            topEntry.style.animation = 'pulse 2s infinite';
+                        }
+                    }, 1000);
+                })
+                .catch((error) => {
+                    console.error("Error fetching leaderboard data:", error);
+                    leaderboardList.innerHTML = `<div class="loading-message" style="text-align: center; padding: 40px; color: #FF6B6B; font-size: 1.5rem;">Error loading leaderboard: ${error.message}</div>`;
+                });
+        }
+        
+        // Function to show leaderboard
+        function showLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.style.display = 'block';
+            
+            // Fetch and display leaderboard data
+            fetchAndDisplayLeaderboard();
+            
+            // Auto-hide leaderboard after 30 seconds
+            setTimeout(() => {
+                hideLeaderboard();
+            }, 30000);
+        }
+        
+        // Function to hide leaderboard
+        function hideLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.style.display = 'none';
+        }
+        
+        // ... existing code ...
+        
+        // Update the handleDisplayUpdate function to handle the SHOW_LEADERBOARD command
+        function handleDisplayUpdate(content) {
+            console.log("Display update received:", content);
+            
+            if (content === "CONNECTED") {
+                connectionStatus.textContent = "Connected to controller";
+                connectionStatus.style.color = "#4CAF50";
+                return;
+            }
+            
+            if (content === "SHOW_LEADERBOARD") {
+                console.log("Showing leaderboard");
+                showLeaderboard();
+                return;
+            }
+            
+            if (content === "GAME1_COMPLETE") {
+                console.log("Game 1 completed");
+                // You can add specific handling for game completion here if needed
+                return;
+            }
+            
+            // Handle other content types as before
+            if (content.startsWith("GAME")) {
+                const gameNumber = content.replace("GAME", "");
+                window.location.href = `/games/game${gameNumber}/display${gameNumber}.html?id=${displayId}`;
+            }
+        }
+        
+        // ... existing code ...
+    </script> 

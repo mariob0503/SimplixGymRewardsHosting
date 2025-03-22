@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game 1 Leaderboard</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+    header h1 {
+      font-size: 3rem;
+      margin: 0;
+      text-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    header h1 span {
+      color: #00BFFF;
+    }
+    header h3 {
+      font-size: 1.3rem;
+      margin: 0.5rem 0 0 0;
+      color: #00BFFF;
+    }
+    #leaderboard {
+      text-align: center;
+      padding: 20px;
+      background-color: rgba(17, 17, 17, 0.8);
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+      max-width: 90%;
+      width: 600px;
+      position: relative;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    #leaderboard h2 {
+      color: #00BFFF;
+      font-size: 2rem;
+      text-shadow: 0 0 5px #00BFFF;
+    }
+    #scoreList {
+      list-style: none;
+      padding: 0;
+    }
+    #scoreList li {
+      font-size: 1.5rem;
+      margin: 15px 0;
+      color: #E0E0E0;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: rgba(0, 191, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    #scoreList li:hover {
+      transform: scale(1.05);
+      background-color: rgba(0, 191, 255, 0.2);
+    }
+    #scoreList li::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: shine 2s infinite linear;
+    }
+    #scoreList li:nth-child(1) {
+      background-color: rgba(255, 215, 0, 0.2);
+      color: #FFD700;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    #scoreList li:nth-child(2) {
+      background-color: rgba(192, 192, 192, 0.2);
+      color: #C0C0C0;
+      font-weight: bold;
+    }
+    #scoreList li:nth-child(3) {
+      background-color: rgba(205, 127, 50, 0.2);
+      color: #CD7F32;
+      font-weight: bold;
+    }
+    .firework {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: explode 1s ease-out forwards;
+      z-index: 5;
+    }
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .spotlight {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.2) 0%, transparent 70%);
+      filter: blur(20px);
+      opacity: 0.7;
+      z-index: 2;
+      pointer-events: none;
+      animation: moveSpotlight 15s infinite alternate ease-in-out;
+    }
+    
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF; }
+      100% { text-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF, 0 0 30px #00BFFF; }
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF; }
+      50% { box-shadow: 0 0 15px #00BFFF, 0 0 30px #00BFFF, 0 0 40px #00BFFF; }
+      100% { box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF; }
+    }
+    
+    @keyframes explode {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(3); opacity: 0; }
+    }
+    
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    @keyframes moveSpotlight {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(50vw, 20vh); }
+      50% { transform: translate(20vw, 50vh); }
+      75% { transform: translate(70vw, 30vh); }
+      100% { transform: translate(10vw, 10vh); }
+    }
+  </style>
+  <script src="/js/particleAnimation.js"></script>
+</head>
+<body>
+  <div class="spotlight"></div>
+  <div class="spotlight" style="animation-delay: -5s;"></div>
+  <div class="spotlight" style="animation-delay: -10s;"></div>
+  
+  <canvas id="particleCanvas"></canvas>
+  
+  <header>
+    <h1>Lift and <span>Earn</span></h1>
+    <h3>Simplix Gym Rewards</h3>
+  </header>
+  
+  <div id="leaderboard">
+    <h2>Leaderboard</h2>
+    <ul id="scoreList"></ul>
+  </div>
+
+  <script>
+    // Create fireworks for visual effect
+    function createFirework() {
+      const firework = document.createElement('div');
+      firework.className = 'firework';
+      firework.style.left = `${Math.random() * 100}%`;
+      firework.style.top = `${Math.random() * 100}%`;
+      firework.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      document.body.appendChild(firework);
+      setTimeout(() => firework.remove(), 1000);
+    }
+
+    // Show leaderboard from localStorage
+    function showLeaderboard() {
+      const scoreList = document.getElementById('scoreList');
+      let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      
+      gameResults.sort((a, b) => b.score - a.score);
+      
+      if (gameResults.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = "No scores yet!";
+        scoreList.appendChild(li);
+      } else {
+        gameResults.slice(0, 5).forEach((result, i) => {
+          const li = document.createElement('li');
+          li.textContent = `${i + 1}. ${result.name} - Rounds: ${result.rounds} | Points: ${result.score}`;
+          scoreList.appendChild(li);
+          
+          // Add entrance animation with delay
+          li.style.opacity = '0';
+          li.style.transform = 'translateY(20px)';
+          li.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          li.style.transitionDelay = `${i * 0.2}s`;
+          
+          setTimeout(() => {
+            li.style.opacity = '1';
+            li.style.transform = 'translateY(0)';
+          }, 100);
+        });
+      }
+
+      // Create fireworks
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+          createFirework();
+        }, i * 300 + Math.random() * 500);
+      }
+      
+      // Continue creating occasional fireworks
+      setInterval(() => {
+        createFirework();
+      }, 2000);
+      
+      // Start particle animation
+      ParticleAnimation.start('particleCanvas');
+    }
+
+    // Load leaderboard when page loads
+    window.addEventListener('DOMContentLoaded', showLeaderboard);
+  </script>
+</body>
+</html> 

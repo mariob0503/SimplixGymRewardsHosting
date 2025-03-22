@@ -1,0 +1,164 @@
+function setupFirebaseListener(displayId) {
+  const connectionStatus = document.getElementById('connectionStatus');
+  let connectionAttempts = 0;
+  const maxAttempts = 3;
+  
+  // Session timeout configuration
+  const sessionTimeoutMs = 30 * 60 * 1000; // 30 minutes in milliseconds
+  let sessionTimeoutTimer = null;
+  let lastActivityTime = Date.now();
+  
+  // Reset session timeout on user activity
+  function resetSessionTimeout() {
+    lastActivityTime = Date.now();
+    
+    // Clear existing timeout if any
+    if (sessionTimeoutTimer) {
+      clearTimeout(sessionTimeoutTimer);
+    }
+    
+    // Set new timeout
+    sessionTimeoutTimer = setTimeout(() => {
+      logoutDueToInactivity();
+    }, sessionTimeoutMs);
+  }
+  
+  // Handle logout due to inactivity
+  function logoutDueToInactivity() {
+    console.log("Session timeout: User inactive for 30 minutes");
+    
+    // Clear any existing intervals
+    if (window.connectionCheckInterval) {
+      clearInterval(window.connectionCheckInterval);
+      window.connectionCheckInterval = null;
+    }
+    
+    // Clear the session timeout
+    if (sessionTimeoutTimer) {
+      clearTimeout(sessionTimeoutTimer);
+      sessionTimeoutTimer = null;
+    }
+    
+    // Update connection status
+    if (connectionStatus) {
+      connectionStatus.textContent = "Bitte scanne erneut einen QR-Code im Studio";
+      connectionStatus.style.color = '#FF6B6B';
+      connectionStatus.classList.remove('connected');
+    }
+    
+    // Clear Firebase connection
+    setDisplayContent("")
+      .then(() => {
+        console.log("Connection cleared due to inactivity");
+      })
+      .catch(error => {
+        console.error("Error clearing connection:", error);
+      });
+    
+    // Optionally, you could also reset the UI to initial state
+    const contentArea = document.getElementById('content');
+    if (contentArea) {
+      contentArea.innerHTML = '<p>Deine Sitzung ist abgelaufen. Bitte scanne erneut einen QR-Code im Studio.</p>';
+    }
+  }
+  
+  // Attach activity listeners to reset the timeout
+  function setupActivityListeners() {
+    const events = ['mousedown', 'keypress', 'scroll', 'touchstart'];
+    
+    events.forEach(eventName => {
+      document.addEventListener(eventName, resetSessionTimeout, { passive: true });
+    });
+  }
+  
+  function attemptConnection() {
+    if (connectionAttempts >= maxAttempts) {
+      if (connectionStatus) {
+        connectionStatus.textContent = `Verbindung fehlgeschlagen nach ${maxAttempts} Versuchen`;
+        connectionStatus.style.color = '#FF6B6B';
+        connectionStatus.classList.remove('connected');
+      }
+      return;
+    }
+    
+    connectionAttempts++;
+    if (connectionStatus) {
+      connectionStatus.textContent = `Verbindung wird hergestellt... (Versuch ${connectionAttempts}/${maxAttempts})`;
+      connectionStatus.style.color = '#00BFFF';
+      connectionStatus.classList.remove('connected');
+    }
+    
+    // Send connection message
+    setDisplayContent("CONNECTED")
+      .then(function() {
+        console.log("Connection message sent for display " + displayId);
+        connectionAttempts = 0; // Reset attempts on success
+        
+        if (connectionStatus) {
+          // Set basic connection message
+          connectionStatus.textContent = `verbunden`;
+          connectionStatus.style.color = '#4CAF50';
+          connectionStatus.classList.add('connected');
+          
+          // Only show username if user is properly authenticated
+          const currentUser = firebase.auth().currentUser;
+          if (currentUser) {
+            // Get user data from Firestore
+            firebase.firestore().collection('users').doc(currentUser.uid).get()
+              .then(doc => {
+                if (doc.exists && doc.data().name) {
+                  // Update connection status with user name
+                  connectionStatus.textContent = `verbunden · ${doc.data().name}`;
+                }
+              })
+              .catch(error => {
+                console.error("Error fetching user data:", error);
+              });
+          }
+          
+          // Set up periodic connection check
+          if (window.connectionCheckInterval) {
+            clearInterval(window.connectionCheckInterval);
+          }
+          window.connectionCheckInterval = setInterval(() => {
+            setDisplayContent("CONNECTED")
+              .catch(error => {
+                console.error("Connection check failed:", error);
+                attemptConnection(); // Try to reconnect on failure
+              });
+          }, 30000); // Check every 30 seconds
+          
+          // Initialize session timeout
+          resetSessionTimeout();
+          // Set up activity listeners
+          setupActivityListeners();
+        }
+      })
+      .catch(function(error) {
+        console.error("Error sending connection message:", error);
+        
+        if (connectionStatus) {
+          connectionStatus.textContent = `Verbindungsfehler: ${error.message}`;
+          connectionStatus.style.color = '#FF6B6B';
+          connectionStatus.classList.remove('connected');
+        }
+        
+        // Try again after a delay
+        setTimeout(attemptConnection, 2000);
+      });
+  }
+  
+  // Start initial connection attempt
+  attemptConnection();
+  
+  // Clean up on page unload
+  window.addEventListener('beforeunload', function() {
+    if (window.connectionCheckInterval) {
+      clearInterval(window.connectionCheckInterval);
+    }
+    if (sessionTimeoutTimer) {
+      clearTimeout(sessionTimeoutTimer);
+    }
+    setDisplayContent(""); // Clear content on disconnect
+  });
+} 

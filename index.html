@@ -1,0 +1,211 @@
+else if (data.content === "CONNECTED") {
+  if (!isConnectionStale(data.lastUpdated)) {
+    // Clear any existing timeouts
+    if (window.connectionTimeout) {
+      clearTimeout(window.connectionTimeout);
+    }
+    
+    // Update the text to "Game in Progress"
+    document.getElementById("mirroredContent").textContent = "Game in Progress";
+    
+    // Ensure canvas is visible and clean
+    const canvas = document.getElementById('particleCanvas');
+    if (canvas) {
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    // Start particle animation with error handling
+    try {
+      console.log("Starting connection particles");
+      ParticleAnimation.start('particleCanvas');
+    } catch (error) {
+      console.error("Error starting particle animation:", error);
+    }
+    
+    // Trigger the turning animation with error handling
+    try {
+      triggerLogonAnimation();
+    } catch (error) {
+      console.error("Error triggering logon animation:", error);
+    }
+    
+    // Start timer and hide QR
+    startTimer(180);
+    document.querySelector(".qr-container").style.display = "none";
+    
+    // Set a new connection timeout
+    window.connectionTimeout = setTimeout(() => {
+      console.log("Connection timeout - resetting");
+      resetPage();
+    }, 190000); // 190 seconds (slightly longer than timer)
+  } else {
+    console.log("Connection is stale, resetting page");
+    resetPage();
+  }
+}
+
+<!-- 16:9 Display Settings -->
+<script>
+    if (window.innerWidth / window.innerHeight > 1) {
+        // ... existing code ...
+        
+        function showLeaderboard() {
+            // Hide the game container
+            document.getElementById('game-container').style.display = 'none';
+            
+            // Show the leaderboard container
+            document.getElementById('leaderboard-container').style.display = 'block';
+            
+            // Load the leaderboard.html content into the container
+            document.getElementById('leaderboard-container').innerHTML = '<iframe src="leaderboard.html" style="width:100%; height:100%; border:none;"></iframe>';
+        }
+        
+        // Function to show leaderboard after game ends
+        function showLeaderboardAfterGame() {
+            // Hide the game container
+            document.getElementById('game-container').style.display = 'none';
+            
+            // Show the leaderboard container
+            document.getElementById('leaderboard-container').style.display = 'block';
+            
+            // Load the leaderboard.html content into the container
+            document.getElementById('leaderboard-container').innerHTML = '<iframe src="leaderboard.html" style="width:100%; height:100%; border:none;"></iframe>';
+        }
+        // ... existing code ...
+    }
+</script>
+
+<!-- 9:16 Display Settings -->
+<script>
+    if (window.innerWidth / window.innerHeight <= 1) {
+        // ... existing code ...
+        
+        function showLeaderboard() {
+            // Hide the game container
+            document.getElementById('game-container').style.display = 'none';
+            
+            // Show the leaderboard container
+            document.getElementById('leaderboard-container').style.display = 'block';
+            
+            // Load the leaderboard.html content into the container
+            document.getElementById('leaderboard-container').innerHTML = '<iframe src="leaderboard.html" style="width:100%; height:100%; border:none;"></iframe>';
+        }
+        
+        // Function to show leaderboard after game ends
+        function showLeaderboardAfterGame() {
+            // Hide the game container
+            document.getElementById('game-container').style.display = 'none';
+            
+            // Show the leaderboard container
+            document.getElementById('leaderboard-container').style.display = 'block';
+            
+            // Load the leaderboard.html content into the container
+            document.getElementById('leaderboard-container').innerHTML = '<iframe src="leaderboard.html" style="width:100%; height:100%; border:none;"></iframe>';
+        }
+        // ... existing code ...
+    }
+</script> 
+
+<body>
+  <div class="outer-wrapper">
+    <header>
+      <h1>Lift and <span>Earn</span></h1>
+      <h3>Simplix Gym Rewards</h3>
+    </header>
+
+    <!-- Add leaderboard section here -->
+    <div id="leaderboard" class="leaderboard-section">
+      <h2>Top Players</h2>
+      <div class="leaderboard-container">
+        <div class="leaderboard-header">
+          <div class="rank-column">Rank</div>
+          <div class="name-column">Player</div>
+          <div class="games-column">Games</div>
+          <div class="points-column">Points</div>
+          <div class="gym-column">Studio</div>
+          <div class="tier-column">Tier</div>
+        </div>
+        <div id="leaderboardList" class="leaderboard-list">
+          <div class="loading-message">Loading leaderboard data...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add dedicated leaderboard container for iframe -->
+    <div id="leaderboard-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background-color: rgba(0, 0, 0, 0.95); overflow: hidden;"></div>
+
+    <div class="main-content">
+      <div class="content-container">
+        <div id="mirroredContent">scan and collect</div>
+        
+        <!-- Add the images in horizontal order with correct path -->
+        <div class="game-images">
+          <img src="/games/assets/qrcodescreenimage1.png" alt="Item 1">
+          <img src="/games/assets/qrcodescreenimage2.png" alt="Item 2">
+          <img src="/games/assets/qrcodescreenimage3.png" alt="Item 3">
+        </div>
+        
+        <!-- Add instruction text -->
+        <div class="instruction-text">
+          Klicke die Items in der richtigen Reihenfolge
+        </div>
+      </div>
+
+      <!-- QR code section with timer below -->
+      <div class="qr-section">
+        <div class="qr-container">
+          <div id="qrCode"></div>
+        </div>
+        <div id="qrTimer"></div>
+        <div id="timer"></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<style>
+/* Additional styles for leaderboard container in 4K displays */
+@media (min-resolution: 192dpi) and (max-aspect-ratio: 9/16) {
+  #leaderboard-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1000 !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    overflow: hidden !important;
+    display: none; /* Initially hidden */
+  }
+  
+  #leaderboard-container iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    overflow: auto !important;
+  }
+  
+  /* Ensure the iframe content is properly scaled */
+  #leaderboard-container iframe html,
+  #leaderboard-container iframe body {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: auto !important;
+  }
+}
+
+/* Additional media query specifically for 4K resolution */
+@media (min-width: 3840px) and (max-aspect-ratio: 9/16) {
+  #leaderboard-container {
+    transform: scale(1) !important; /* Ensure no scaling issues */
+  }
+  
+  #leaderboard-container iframe {
+    transform-origin: top left !important;
+  }
+}
+</style> 

@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Simplix Gym Rewards</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    h1 span {
+      color: #00BFFF;
+    }
+
+    .login-container {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .admin-container {
+      display: none;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 30px;
+      width: 100%;
+      max-width: 1000px;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+    }
+    
+    .tab-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      background-color: #2a2a2a;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .tab.active {
+      background-color: #00BFFF;
+    }
+    
+    .tab:hover {
+      background-color: #0099cc;
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background-color: #2a2a2a;
+      border-radius: 5px;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+
+    button {
+      background-color: #00BFFF;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #0099cc;
+    }
+
+    .user-list, .gym-list {
+      margin-top: 20px;
+    }
+    
+    .user-item, .gym-item {
+      background-color: #1e1e1e;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #2a2a2a;
+    }
+    
+    .success {
+      color: #4CAF50;
+    }
+    
+    .error {
+      color: #FF6B6B;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #333;
+    }
+
+    th {
+      background-color: #1e1e1e;
+      color: #00BFFF;
+    }
+
+    tr:hover {
+      background-color: #1e1e1e;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .loading::after {
+      content: "...";
+      animation: dots 1.5s steps(5, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: "."; }
+      40% { content: ".."; }
+      60%, 100% { content: "..."; }
+    }
+    
+    .reset-button {
+      background-color: #FF6B6B;
+      color: white;
+      margin-left: 10px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .reset-button:hover {
+      background-color: #FF4949;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal-content {
+      background-color: #1e1e1e;
+      margin: 10% auto;
+      padding: 25px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+    }
+    
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: #00BFFF;
+    }
+    
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .action-button {
+      background-color: #00BFFF;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    .action-button.secondary {
+      background-color: #2a2a2a;
+    }
+    
+    .action-button:hover {
+      opacity: 0.9;
+    }
+    
+    .admin-badge {
+      background-color: #00BFFF;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    
+    .user-detail-row {
+      display: flex;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 10px;
+    }
+    
+    .user-detail-label {
+      font-weight: bold;
+      width: 150px;
+      color: #00BFFF;
+    }
+    
+    .user-detail-value {
+      flex: 1;
+    }
+
+    .gym-form-container {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #00BFFF;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #333;
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+    
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #00BFFF;
+    }
+
+    .user-info {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background-color: #2a2a2a;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    
+    .user-info #userName {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .logout-button {
+      background-color: #FF6B6B;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 10px;
+      transition: background-color 0.3s;
+    }
+    
+    .logout-button:hover {
+      background-color: #FF4949;
+    }
+    
+    /* Cleanup Tool Styles */
+    .control-panel {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #333;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .primary-btn {
+      background-color: #00BFFF;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background-color: #0099cc;
+    }
+    
+    .secondary-btn {
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+    
+    .secondary-btn:hover {
+      background-color: #3a3a3a;
+    }
+    
+    .danger-btn {
+      background-color: #ff6b6b;
+      color: white;
+    }
+    
+    .danger-btn:hover {
+      background-color: #ff4040;
+    }
+    
+    .settings {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .log-container {
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #2a2a2a;
+      height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .info {
+      color: #0099cc;
+    }
+    
+    .success {
+      color: #4CAF50;
+    }
+    
+    .error {
+      color: #F44336;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #1e1e1e;
+      border-radius: 5px;
+      border-left: 4px solid #00BFFF;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00BFFF;
+      margin: 5px 0;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #aaa;
+    }
+    
+    .auto-cleanup-indicator,
+    .firestore-auto-cleanup-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .active {
+      background-color: #4CAF50;
+    }
+    
+    .inactive {
+      background-color: #F44336;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Simplix Gym <span>Rewards</span></h1>
+    <h3>Admin Dashboard</h3>
+    <div id="userInfo" class="user-info">
+      <span id="userName">Not logged in</span>
+      <span id="adminStatus" class="admin-badge" style="display: none;">Admin</span>
+      <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
+    </div>
+  </header>
+  
+  <div id="loginContainer" class="login-container">
+    <h2>Administrator Login</h2>
+    <p>Please sign in with your admin account to continue.</p>
+    <button id="loginButton">Sign in with Google</button>
+    <div id="loginStatus" class="status"></div>
+  </div>
+
+  <div id="adminContainer" class="admin-container">
+    <div class="tab-container">
+      <button class="tab active" data-tab="gyms">Gym Setup</button>
+      <button class="tab" data-tab="users">User Management</button>
+      <button class="tab" data-tab="displays">Display Management</button>
+      <button class="tab" data-tab="cleanup">Connection Cleanup</button>
+    </div>
+
+    <div id="gymsTab" class="tab-content active">
+      <h2>Setup Gym Locations</h2>
+      <p>Add or modify gym locations in your Firestore database.</p>
+      
+      <div class="gym-form-container">
+        <h3>Add/Update Gym</h3>
+        <form id="gymForm">
+          <div class="form-group">
+            <label for="gymSelect">Select Gym to Update:</label>
+            <select id="gymSelect">
+              <option value="new">-- Add New Gym --</option>
+              <!-- Options will be populated dynamically -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="gymName">Gym Name:</label>
+            <input type="text" id="gymName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="gymLocation">Location/Address:</label>
+            <input type="text" id="gymLocation" placeholder="e.g., 123 Main St, City, Country">
+          </div>
+          
+          <button type="submit" id="saveGymButton">Save Gym</button>
+        </form>
+      </div>
+      
+      <div id="gymStatus" class="status"></div>
+      <div class="gym-list"></div>
+    </div>
+
+    <div id="usersTab" class="tab-content">
+      <h2>User Management</h2>
+      <p>Review and manage user accounts and their activity.</p>
+      <div class="loading">Loading users</div>
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Last Active</th>
+            <th>Total Points</th>
+            <th>Admin</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="userStatus" class="status"></div>
+      
+      <!-- User Details Modal -->
+      <div id="userDetailsModal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h3>User Details</h3>
+          <div id="userDetailsContent"></div>
+          <div class="modal-actions">
+            <button id="promoteToAdminBtn" class="action-button">Promote to Admin</button>
+            <button id="closeModalBtn" class="action-button secondary">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="displaysTab" class="tab-content">
+      <h2>Display Management</h2>
+      <p>Manage display connections and clean up orphaned sessions.</p>
+      <button id="cleanupDisplaysButton">Clean Up Orphaned Displays</button>
+      <div class="loading">Loading displays</div>
+      <table id="displaysTable">
+        <thead>
+          <tr>
+            <th>Display ID</th>
+            <th>Last Updated</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="displayStatus" class="status"></div>
+    </div>
+
+    <div id="cleanupTab" class="tab-content">
+      <h2>Display Connection Cleanup Tool</h2>
+      <p>Cleanup stale display connections from both Realtime Database and Firestore.</p>
+      
+      <div class="control-panel">
+        <h3>Realtime Database Cleanup</h3>
+        <div class="button-row">
+          <button id="runCleanupBtn" class="primary-btn">Run RTDB Cleanup Now</button>
+          <button id="toggleAutoCleanupBtn" class="secondary-btn">Start RTDB Auto Cleanup</button>
+          <button id="viewAllBtn" class="secondary-btn">View RTDB Connections</button>
+        </div>
+        
+        <div class="settings">
+          <label for="staleThreshold">Stale Threshold (seconds):</label>
+          <input type="number" id="staleThreshold" value="120" min="10" max="3600">
+          
+          <label for="autoInterval">Auto Cleanup Interval (minutes):</label>
+          <input type="number" id="autoInterval" value="2" min="1" max="60">
+          
+          <div>
+            <span>Auto Cleanup: </span>
+            <span class="auto-cleanup-indicator inactive"></span>
+            <span id="autoStatus">Inactive</span>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 20px;">Firestore Cleanup</h3>
+        <div class="button-row">
+          <button id="runFirestoreCleanupBtn" class="primary-btn">Run Firestore Cleanup Now</button>
+          <button id="toggleFirestoreAutoCleanupBtn" class="secondary-btn">Start Firestore Auto Cleanup</button>
+          <button id="viewFirestoreBtn" class="secondary-btn">View Firestore Displays</button>
+        </div>
+        
+        <div class="settings">
+          <label for="firestoreStaleThreshold">Stale Threshold (seconds):</label>
+          <input type="number" id="firestoreStaleThreshold" value="120" min="10" max="3600">
+          
+          <label for="firestoreAutoInterval">Auto Cleanup Interval (minutes):</label>
+          <input type="number" id="firestoreAutoInterval" value="2" min="1" max="60">
+          
+          <div>
+            <span>Auto Cleanup: </span>
+            <span class="firestore-auto-cleanup-indicator inactive"></span>
+            <span id="firestoreAutoStatus">Inactive</span>
+          </div>
+        </div>
+
+        <div class="button-row" style="margin-top: 20px;">
+          <button id="clearLogBtn" class="danger-btn">Clear Log</button>
+        </div>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">Realtime Database</div>
+          <div class="stat-value" id="totalConnections">0</div>
+          <div class="stat-label">Total Connections</div>
+          <div class="stat-value" id="staleConnections">0</div>
+          <div class="stat-label">Stale Connections</div>
+          <div class="stat-value" id="lastCleanupTime">-</div>
+          <div class="stat-label">Last Cleanup</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Firestore</div>
+          <div class="stat-value" id="firestoreTotalDisplays">0</div>
+          <div class="stat-label">Total Displays</div>
+          <div class="stat-value" id="firestoreStaleDisplays">0</div>
+          <div class="stat-label">Stale Displays</div>
+          <div class="stat-value" id="firestoreLastCleanupTime">-</div>
+          <div class="stat-label">Last Cleanup</div>
+        </div>
+      </div>
+      
+      <h3>Activity Log</h3>
+      <div id="logContainer" class="log-container"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  <!-- Firebase Config -->
+  <script>
+    // Initialize Firebase with compat version
+    const firebaseConfig = {
+      apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+      authDomain: window.location.hostname.includes('web.app') 
+        ? "simplixgymrewards.web.app" 
+        : "simplixgymrewards.firebaseapp.com",
+      databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "simplixgymrewards",
+      storageBucket: "simplixgymrewards.firebasestorage.app",
+      messagingSenderId: "821049711023",
+      appId: "1:821049711023:web:32fb1e80755cc00531f75a",
+      measurementId: "G-TP948S3PD8"
+    };
+
+    // Initialize Firebase if not already initialized
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    // Get Firestore instance
+    const firestoreDb = firebase.firestore();
+    
+    // Get Auth instance
+    const firebaseAuth = firebase.auth();
+    
+    // Get Realtime Database instance
+    const realtimeDb = firebase.database();
+    
+    // Set persistence to SESSION to avoid auth issues
+    firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .catch(error => {
+        console.error("Error setting auth persistence:", error);
+      });
+  </script>
+  
+  <!-- Setup scripts -->
+  <script src="/js/setupGyms.js"></script>
+  <script type="module">
+    import { auth, db, rtdb, signInWithGoogle, checkRedirectResult } from './js/firebase-services.js';
+    
+    // DOM Elements
+    const loginContainer = document.getElementById('loginContainer');
+    const adminContainer = document.getElementById('adminContainer');
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const loginStatus = document.getElementById('loginStatus');
+    const cleanupDisplaysButton = document.getElementById('cleanupDisplaysButton');
+    const displayStatus = document.getElementById('displayStatus');
+    const userStatus = document.getElementById('userStatus');
+    const setupGymsButton = document.getElementById('setupGymsButton');
+    const userNameElement = document.getElementById('userName');
+    const adminStatusElement = document.getElementById('adminStatus');
+
+    // Admin UIDs - replace with your admin UIDs
+    const ADMIN_UIDS = [
+      // Add your actual UID here after signing in once and checking the console
+      // Example: 'abc123xyz456'
+      // The console will show "Current user UID: your-uid-here" after you sign in
+    ];
+
+    // Check if user is admin
+    function isAdmin(uid) {
+      // If no UIDs are specified in the array, allow the first user who signs in to be admin
+      if (!ADMIN_UIDS || ADMIN_UIDS.length === 0) {
+        console.log("No admin UIDs specified. First user becomes admin.");
+        // Add the current user to the admin list
+        ADMIN_UIDS.push(uid);
+        return true;
+      }
+      return ADMIN_UIDS.includes(uid);
+    }
+
+    // Check for redirect result when the page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // First check for any redirect result
+        const redirectUser = await checkRedirectResult();
+        if (redirectUser) {
+          console.log("User signed in via redirect:", redirectUser.displayName);
+          handleAuthStateChange(redirectUser);
+        }
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+        loginStatus.textContent = `Error: ${error.message}`;
+        loginStatus.className = 'status error';
+      }
+    });
+
+    // Authentication state observer
+    auth.onAuthStateChanged(async (user) => {
+      console.log("Auth module state changed:", user ? user.email : "logged out");
+      if (user) {
+        // Sync with global Firebase Auth
+        try {
+          // Get the current user's ID token
+          const idToken = await user.getIdToken(true);
+          
+          // Check if we need to sign in to the global Firebase Auth
+          if (!firebaseAuth.currentUser || firebaseAuth.currentUser.uid !== user.uid) {
+            console.log("Syncing auth state with global Firebase Auth");
+            
+            // Sign in with the ID token to the global Firebase Auth
+            await firebaseAuth.signInWithCustomToken(idToken)
+              .catch(async (error) => {
+                console.warn("Could not sign in with custom token:", error);
+                
+                // Try alternative approach - sign in with credential
+                try {
+                  const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+                  await firebaseAuth.signInWithCredential(credential);
+                  console.log("Signed in with credential");
+                } catch (credError) {
+                  console.error("Could not sign in with credential:", credError);
+                  
+                  // Last resort - force token refresh and try again
+                  await user.getIdToken(true);
+                  console.log("Forced token refresh");
+                }
+              });
+          }
+        } catch (error) {
+          console.warn("Could not sync auth state:", error);
+        }
+      }
+      
+      // Call the main handler
+      handleAuthStateChange(user);
+    });
+    
+    // Also observe the Firebase Auth state for consistency
+    firebaseAuth.onAuthStateChanged(user => {
+      if (user) {
+        console.log("Firebase Auth state changed - user logged in:", user.email);
+        
+        // Update the Realtime Database auth
+        realtimeDb.app.INTERNAL.getToken()
+          .then(() => console.log("Realtime Database auth updated"))
+          .catch(error => console.error("Error updating Realtime Database auth:", error));
+      } else {
+        console.log("Firebase Auth state changed - user logged out");
+      }
+    });
+
+    async function handleAuthStateChange(user) {
+      if (user) {
+        // Log the current user's UID to make it easier to add to admin list
+        console.log("Current user UID:", user.uid);
+        console.log("Current user email:", user.email);
+        
+        // Update user info display
+        userNameElement.textContent = user.displayName || user.email || user.uid;
+        logoutButton.style.display = 'inline-block';
+        
+        // Check if user is admin in Firestore
+        try {
+          const firestoreDb = firebase.firestore();
+          const userDoc = await firestoreDb.collection('users').doc(user.uid).get();
+          
+          let isUserAdmin = false;
+          if (userDoc.exists) {
+            const userData = userDoc.data();
+            isUserAdmin = userData.isAdmin === true;
+            
+            // If user is not marked as admin in Firestore but email is mario@simplix.solutions
+            if (!isUserAdmin && user.email === "mario@simplix.solutions") {
+              // Update user to be admin
+              await firestoreDb.collection('users').doc(user.uid).set({
+                isAdmin: true,
+                email: user.email,
+                displayName: user.displayName || '',
+                adminSince: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+              
+              isUserAdmin = true;
+            }
+          } else if (user.email === "mario@simplix.solutions") {
+            // Create user document for mario@simplix.solutions if it doesn't exist
+            await firestoreDb.collection('users').doc(user.uid).set({
+              isAdmin: true,
+              email: user.email,
+              displayName: user.displayName || '',
+              adminSince: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            isUserAdmin = true;
+          }
+          
+          // Update admin status display
+          if (isUserAdmin) {
+            adminStatusElement.style.display = 'inline-block';
+          } else {
+            adminStatusElement.style.display = 'none';
+          }
+          
+          // Check if user has admin access
+          if (isUserAdmin) {
+            loginContainer.style.display = 'none';
+            adminContainer.style.display = 'block';
+            loadInitialData();
+          } else {
+            loginContainer.style.display = 'block';
+            adminContainer.style.display = 'none';
+            loginStatus.textContent = 'Access denied. You must be an administrator.';
+            loginStatus.className = 'status error';
+            auth.signOut();
+          }
+        } catch (error) {
+          console.error("Error checking admin status:", error);
+          loginStatus.textContent = `Error checking admin status: ${error.message}`;
+          loginStatus.className = 'status error';
+        }
+      } else {
+        // User is not logged in
+        userNameElement.textContent = "Not logged in";
+        adminStatusElement.style.display = 'none';
+        logoutButton.style.display = 'none';
+        loginContainer.style.display = 'block';
+        adminContainer.style.display = 'none';
+      }
+    }
+
+    // Sign in with Google
+    loginButton.addEventListener('click', async () => {
+      loginStatus.textContent = 'Initiating sign-in...';
+      loginStatus.className = 'status';
+      loginButton.disabled = true;
+      
+      try {
+        // Clear any previous auth errors
+        sessionStorage.removeItem('authError');
+        
+        // Use the signInWithGoogle function from firebase-services.js
+        const user = await signInWithGoogle();
+        
+        if (!user) {
+          // If no user is returned, it means we're redirecting method
+          loginStatus.textContent = 'Redirecting to Google sign-in...';
+          // Don't re-enable the button as we're redirecting
+          return;
+        }
+        
+        // Check for stored auth errors
+        const storedError = sessionStorage.getItem('authError');
+        if (storedError) {
+          const errorData = JSON.parse(storedError);
+          throw new Error(errorData.message);
+        }
+        
+        // User is signed in, check if admin
+        if (isAdmin(user.uid)) {
+          loginStatus.textContent = 'Sign-in successful!';
+          loginStatus.className = 'status success';
+        } else {
+          loginStatus.textContent = 'Access denied. You must be an administrator.';
+          loginStatus.className = 'status error';
+          await auth.signOut();
+        }
+      } catch (error) {
+        console.error("Google sign-in error:", error);
+        loginStatus.textContent = `Error: ${error.message}`;
+        loginStatus.className = 'status error';
+        loginButton.disabled = false;
+      }
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+      });
+    });
+
+    // Load initial data
+    function loadInitialData() {
+      console.log("Loading initial data...");
+      // Call the loadGyms function from setupGyms.js
+      if (typeof window.loadGyms === 'function') {
+        window.loadGyms();
+      } else {
+        console.error("loadGyms function not found");
+      }
+      
+      // Load users and displays
+      loadUsers();
+      loadDisplays();
+    }
+
+    // Load and display users
+    async function loadUsers() {
+      const usersTable = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+      usersTable.innerHTML = '';
+      document.querySelector('#usersTab .loading').style.display = 'block';
+
+      try {
+        // Use the compat version of Firestore
+        const firestoreDb = firebase.firestore();
+        const usersSnapshot = await firestoreDb.collection('users').get();
+        
+        usersSnapshot.forEach(doc => {
+          const userData = doc.data();
+          const row = usersTable.insertRow();
+          
+          // Check if user is admin
+          const isUserAdmin = userData.isAdmin === true;
+          
+          row.innerHTML = `
+            <td>${userData.displayName || 'N/A'}</td>
+            <td>${userData.email || 'N/A'}</td>
+            <td>${userData.lastActive ? new Date(userData.lastActive).toLocaleString() : 'Never'}</td>
+            <td>${userData.totalPoints || userData['total-points'] || 0}</td>
+            <td>${isUserAdmin ? '<span class="admin-badge">Admin</span>' : ''}</td>
+            <td>
+              <button onclick="viewUserDetails('${doc.id}', ${isUserAdmin})">View Details</button>
+            </td>
+          `;
+        });
+      } catch (error) {
+        console.error("Error loading users:", error);
+        userStatus.textContent = `Error loading users: ${error.message}`;
+        userStatus.className = 'status error';
+      }
+
+      document.querySelector('#usersTab .loading').style.display = 'none';
+    }
+
+    // Load and display active displays
+    async function loadDisplays() {
+      const displaysTable = document.getElementById('displaysTable').getElementsByTagName('tbody')[0];
+      displaysTable.innerHTML = '';
+      document.querySelector('#displaysTab .loading').style.display = 'block';
+
+      try {
+        // Ensure user is authenticated
+        const currentUser = auth.currentUser || firebaseAuth.currentUser;
+        if (!currentUser) {
+          throw new Error('You must be logged in to view displays');
+        }
+        
+        // Get user document to verify admin status
+        const userDoc = await firestoreDb.collection('users').doc(currentUser.uid).get();
+        
+        let isUserAdmin = false;
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          isUserAdmin = userData.isAdmin === true;
+        }
+        
+        // Special case for mario@simplix.solutions
+        if (!isUserAdmin && currentUser.email !== "mario@simplix.solutions") {
+          throw new Error('You must be an admin to view displays');
+        }
+        
+        // Get a fresh ID token with the correct claims
+        const idToken = await currentUser.getIdToken(true);
+        console.log("Got fresh ID token for database access");
+        
+        // Use the compat version of Realtime Database
+        const realtimeDb = firebase.database();
+        
+        // Directly access displays with admin privileges
+        try {
+          // First try to access a simple path to test connection
+          console.log("Testing database connection...");
+          await realtimeDb.ref('.info/connected').once('value');
+          
+          console.log("Database connection successful, fetching displays...");
+          const displaysRef = realtimeDb.ref('displays');
+          const snapshot = await displaysRef.once('value');
+          const displays = snapshot.val() || {};
+
+          if (Object.keys(displays).length === 0) {
+            displaysTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">No displays found</td></tr>';
+            displayStatus.textContent = 'No displays found';
+            displayStatus.className = 'status';
+          } else {
+            Object.entries(displays).forEach(([id, data]) => {
+              const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Unknown';
+              const isStale = isDisplayStale(data.lastUpdated);
+              
+              const row = displaysTable.insertRow();
+              row.innerHTML = `
+                <td>${id}</td>
+                <td>${lastUpdated}</td>
+                <td>${isStale ? '<span style="color: #FF6B6B">Stale</span>' : '<span style="color: #4CAF50">Active</span>'}</td>
+                <td>
+                  <button onclick="deleteDisplay('${id}')" ${!isStale ? 'disabled' : ''}>Delete</button>
+                </td>
+              `;
+            });
+            
+            displayStatus.textContent = 'Displays loaded successfully';
+            displayStatus.className = 'status success';
+          }
+        } catch (dbError) {
+          console.error("Database access error:", dbError);
+          
+          // Try an alternative approach with custom auth
+          console.log("Trying alternative authentication approach...");
+          
+          // Create a custom token for admin access (this would require a Cloud Function in production)
+          // For now, we'll use a workaround by directly accessing with the current user's credentials
+          
+          // Try to access with explicit auth
+          const displaysRef = realtimeDb.ref('displays');
+          displaysRef.on('value', (snapshot) => {
+            const displays = snapshot.val() || {};
+            
+            if (Object.keys(displays).length === 0) {
+              displaysTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">No displays found</td></tr>';
+              displayStatus.textContent = 'No displays found';
+              displayStatus.className = 'status';
+            } else {
+              // Clear the table first
+              displaysTable.innerHTML = '';
+              
+              Object.entries(displays).forEach(([id, data]) => {
+                const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString() : 'Unknown';
+                const isStale = isDisplayStale(data.lastUpdated);
+                
+                const row = displaysTable.insertRow();
+                row.innerHTML = `
+                  <td>${id}</td>
+                  <td>${lastUpdated}</td>
+                  <td>${isStale ? '<span style="color: #FF6B6B">Stale</span>' : '<span style="color: #4CAF50">Active</span>'}</td>
+                  <td>
+                    <button onclick="deleteDisplay('${id}')" ${!isStale ? 'disabled' : ''}>Delete</button>
+                  </td>
+                `;
+              });
+              
+              displayStatus.textContent = 'Displays loaded successfully';
+              displayStatus.className = 'status success';
+            }
+          }, (error) => {
+            console.error("Error in alternative approach:", error);
+            throw error;
+          });
+        }
+      } catch (error) {
+        console.error("Error loading displays:", error);
+        displayStatus.textContent = `Error loading displays: ${error.message}`;
+        displayStatus.className = 'status error';
+        displaysTable.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #FF6B6B;">Error: ${error.message}</td></tr>`;
+      }
+
+      document.querySelector('#displaysTab .loading').style.display = 'none';
+    }
+
+    // Check if display connection is stale
+    function isDisplayStale(lastUpdated) {
+      if (!lastUpdated) return true;
+      return Date.now() - lastUpdated > 2 * 60 * 1000; // 2 minutes
+    }
+
+    // Clean up orphaned displays
+    cleanupDisplaysButton.addEventListener('click', async () => {
+      displayStatus.textContent = 'Cleaning up orphaned displays...';
+      displayStatus.className = 'status';
+
+      try {
+        // Ensure user is authenticated
+        const currentUser = auth.currentUser || firebaseAuth.currentUser;
+        if (!currentUser) {
+          throw new Error('You must be logged in to clean up displays');
+        }
+        
+        // Get user document to verify admin status
+        const userDoc = await firestoreDb.collection('users').doc(currentUser.uid).get();
+        
+        let isUserAdmin = false;
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          isUserAdmin = userData.isAdmin === true;
+        }
+        
+        // Special case for mario@simplix.solutions
+        if (!isUserAdmin && currentUser.email !== "mario@simplix.solutions") {
+          throw new Error('You must be an admin to clean up displays');
+        }
+        
+        // Get a fresh ID token with the correct claims
+        const idToken = await currentUser.getIdToken(true);
+        console.log("Got fresh ID token for database access");
+        
+        // Use the compat version of Realtime Database
+        const realtimeDb = firebase.database();
+        
+        // Try to access with explicit auth
+        const displaysRef = realtimeDb.ref('displays');
+        const snapshot = await displaysRef.once('value');
+        const displays = snapshot.val() || {};
+        
+        if (!displays || Object.keys(displays).length === 0) {
+          displayStatus.textContent = 'No displays found to clean up';
+          displayStatus.className = 'status';
+          return;
+        }
+        
+        const updates = {};
+        let count = 0;
+
+        Object.entries(displays).forEach(([id, data]) => {
+          if (isDisplayStale(data.lastUpdated)) {
+            updates[id] = null;
+            count++;
+          }
+        });
+
+        if (count > 0) {
+          await displaysRef.update(updates);
+          displayStatus.textContent = `Successfully removed ${count} orphaned display(s)`;
+          displayStatus.className = 'status success';
+          loadDisplays(); // Refresh the display list
+        } else {
+          displayStatus.textContent = 'No orphaned displays found';
+          displayStatus.className = 'status success';
+        }
+      } catch (error) {
+        console.error("Error cleaning up displays:", error);
+        displayStatus.textContent = `Error cleaning up displays: ${error.message}`;
+        displayStatus.className = 'status error';
+      }
+    });
+
+    // Function to delete display
+    window.deleteDisplay = async function(displayId) {
+      try {
+        // Ensure user is authenticated
+        const currentUser = auth.currentUser || firebaseAuth.currentUser;
+        if (!currentUser) {
+          throw new Error('You must be logged in to delete displays');
+        }
+        
+        // Get user document to verify admin status
+        const userDoc = await firestoreDb.collection('users').doc(currentUser.uid).get();
+        
+        let isUserAdmin = false;
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          isUserAdmin = userData.isAdmin === true;
+        }
+        
+        // Special case for mario@simplix.solutions
+        if (!isUserAdmin && currentUser.email !== "mario@simplix.solutions") {
+          throw new Error('You must be an admin to delete displays');
+        }
+        
+        // Get a fresh ID token with the correct claims
+        const idToken = await currentUser.getIdToken(true);
+        console.log("Got fresh ID token for database access");
+        
+        // Use the compat version of Realtime Database
+        const realtimeDb = firebase.database();
+        
+        // Delete the display
+        await realtimeDb.ref(`displays/${displayId}`).remove();
+        displayStatus.textContent = `Successfully deleted display ${displayId}`;
+        displayStatus.className = 'status success';
+        loadDisplays(); // Refresh the display list
+      } catch (error) {
+        console.error("Error deleting display:", error);
+        displayStatus.textContent = `Error deleting display: ${error.message}`;
+        displayStatus.className = 'status error';
+      }
+    };
+
+    // Make functions available globally
+    window.viewUserDetails = async function(userId, isAlreadyAdmin) {
+      console.log('Viewing user details:', userId, 'Is already admin:', isAlreadyAdmin);
+      
+      // Get modal elements
+      const modal = document.getElementById('userDetailsModal');
+      const contentDiv = document.getElementById('userDetailsContent');
+      const promoteBtn = document.getElementById('promoteToAdminBtn');
+      
+      // Clear previous content
+      contentDiv.innerHTML = '<p>Loading user details...</p>';
+      
+      // Show the modal
+      modal.style.display = 'block';
+      
+      try {
+        // Get user data from Firestore
+        const firestoreDb = firebase.firestore();
+        const userDoc = await firestoreDb.collection('users').doc(userId).get();
+        
+        if (!userDoc.exists) {
+          contentDiv.innerHTML = '<p>User not found</p>';
+          return;
+        }
+        
+        const userData = userDoc.data();
+        
+        // Format user details
+        let detailsHTML = '';
+        
+        // Add user ID
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">User ID:</div>
+            <div class="user-detail-value">${userId}</div>
+          </div>
+        `;
+        
+        // Add name
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">Name:</div>
+            <div class="user-detail-value">${userData.displayName || 'N/A'}</div>
+          </div>
+        `;
+        
+        // Add email
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">Email:</div>
+            <div class="user-detail-value">${userData.email || 'N/A'}</div>
+          </div>
+        `;
+        
+        // Add last active
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">Last Active:</div>
+            <div class="user-detail-value">${userData.lastActive ? new Date(userData.lastActive).toLocaleString() : 'Never'}</div>
+          </div>
+        `;
+        
+        // Add total points
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">Total Points:</div>
+            <div class="user-detail-value">${userData.totalPoints || userData['total-points'] || 0}</div>
+          </div>
+        `;
+        
+        // Add admin status
+        detailsHTML += `
+          <div class="user-detail-row">
+            <div class="user-detail-label">Admin Status:</div>
+            <div class="user-detail-value">${userData.isAdmin === true ? '<span class="admin-badge">Admin</span>' : 'Regular User'}</div>
+          </div>
+        `;
+        
+        // Add created date if available
+        if (userData.created) {
+          const createdDate = userData.created.toDate ? userData.created.toDate() : new Date(userData.created);
+          detailsHTML += `
+            <div class="user-detail-row">
+              <div class="user-detail-label">Account Created:</div>
+              <div class="user-detail-value">${createdDate.toLocaleString()}</div>
+            </div>
+          `;
+        }
+        
+        // Add gym membership if available
+        if (userData.gymId) {
+          detailsHTML += `
+            <div class="user-detail-row">
+              <div class="user-detail-label">Gym Membership:</div>
+              <div class="user-detail-value">${userData.gymId}</div>
+            </div>
+          `;
+        }
+        
+        contentDiv.innerHTML = detailsHTML;
+        
+        // Configure promote button
+        if (isAlreadyAdmin || userData.isAdmin === true) {
+          promoteBtn.style.display = 'none'; // Hide button if already admin
+        } else {
+          promoteBtn.style.display = 'block';
+          promoteBtn.onclick = () => promoteToAdmin(userId);
+        }
+        
+      } catch (error) {
+        console.error("Error loading user details:", error);
+        contentDiv.innerHTML = `<p class="error">Error loading user details: ${error.message}</p>`;
+      }
+    };
+    
+    // Function to promote user to admin
+    window.promoteToAdmin = async function(userId) {
+      const statusElement = document.getElementById('userStatus');
+      const modal = document.getElementById('userDetailsModal');
+      
+      try {
+        console.log("Promoting user to admin:", userId);
+        statusElement.textContent = 'Promoting user to admin...';
+        statusElement.className = 'status';
+        
+        // First, get the user data to ensure we have the email
+        const firestoreDb = firebase.firestore();
+        const userDoc = await firestoreDb.collection('users').doc(userId).get();
+        
+        if (!userDoc.exists) {
+          throw new Error("User document not found");
+        }
+        
+        const userData = userDoc.data();
+        
+        // Update user in Firestore to mark as admin with merge option
+        await firestoreDb.collection('users').doc(userId).set({
+          isAdmin: true,
+          adminSince: firebase.firestore.FieldValue.serverTimestamp(),
+          // Include email to ensure it exists
+          email: userData.email || ''
+        }, { merge: true });
+        
+        console.log("User successfully promoted to admin");
+        
+        // Close modal
+        modal.style.display = 'none';
+        
+        // Show success message
+        statusElement.textContent = 'User successfully promoted to admin';
+        statusElement.className = 'status success';
+        
+        // Refresh user list
+        loadUsers();
+        
+      } catch (error) {
+        console.error("Error promoting user to admin:", error);
+        statusElement.textContent = `Error promoting user: ${error.message}`;
+        statusElement.className = 'status error';
+      }
+    };
+    
+    // Close modal when clicking the X
+    document.querySelector('.close-modal').addEventListener('click', () => {
+      document.getElementById('userDetailsModal').style.display = 'none';
+    });
+    
+    // Close modal when clicking the close button
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('userDetailsModal').style.display = 'none';
+    });
+    
+    // Close modal when clicking outside the content
+    window.addEventListener('click', (event) => {
+      const modal = document.getElementById('userDetailsModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    // Add event listener to setup button
+    if (setupGymsButton) {
+      setupGymsButton.addEventListener('click', function() {
+        if (typeof window.setupGyms === 'function') {
+          window.setupGyms();
+        } else {
+          document.getElementById('gymStatus').textContent = 'Error: Setup function not found';
+        }
+      });
+    }
+
+    // Handle gym form submission
+    document.getElementById('gymForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const gymName = document.getElementById('gymName').value.trim();
+      const gymLocation = document.getElementById('gymLocation').value.trim();
+      const gymSelect = document.getElementById('gymSelect');
+      const statusElement = document.getElementById('gymStatus');
+      
+      if (!gymName) {
+        statusElement.textContent = 'Please enter a gym name';
+        statusElement.className = 'status error';
+        return;
+      }
+      
+      statusElement.textContent = 'Saving gym...';
+      statusElement.className = 'status';
+      
+      try {
+        // Use the imported auth module instead of firebaseAuth
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          console.warn('No current user found in auth module, trying firebaseAuth');
+          // Try the global Firebase auth as fallback
+          const firebaseCurrentUser = firebaseAuth.currentUser;
+          if (!firebaseCurrentUser) {
+            throw new Error('You must be logged in to save a gym');
+          }
+        }
+        
+        // Use the current user from whichever auth is available
+        const user = currentUser || firebaseAuth.currentUser;
+        
+        // Get user document to verify admin status
+        const userDoc = await firestoreDb.collection('users').doc(user.uid).get();
+        
+        if (!userDoc.exists || userDoc.data().isAdmin !== true) {
+          // Special case for mario@simplix.solutions
+          if (user.email !== "mario@simplix.solutions") {
+            throw new Error('You must be an admin to save a gym');
+          }
+        }
+        
+        // Check if a gym with this name already exists
+        const existingGymsSnapshot = await firestoreDb.collection('gyms')
+          .where('name', '==', gymName)
+          .get();
+        
+        let existingGymId = null;
+        let isCurrentGym = false;
+        
+        // If we're updating an existing gym and the name hasn't changed, don't consider it a duplicate
+        if (!existingGymsSnapshot.empty) {
+          existingGymsSnapshot.forEach(doc => {
+            // If this is the gym we're currently editing, it's not a duplicate
+            if (gymSelect.value !== 'new' && doc.id === gymSelect.value) {
+              isCurrentGym = true;
+              console.log("Updating existing gym with same name:", doc.id);
+            } else {
+              // This is a different gym with the same name
+              existingGymId = doc.id;
+              console.log("Found existing gym with same name:", existingGymId);
+            }
+          });
+        }
+        
+        // Create gym data
+        const gymData = {
+          name: gymName,
+          location: gymLocation || '',
+          lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: user.uid
+        };
+        
+        // If we're adding a new gym but a gym with this name already exists, update that gym instead
+        if (gymSelect.value === 'new' && existingGymId) {
+          await firestoreDb.collection('gyms').doc(existingGymId).set(gymData, { merge: true });
+          console.log("Updated existing gym instead of creating duplicate:", existingGymId);
+          statusElement.textContent = `Updated existing gym "${gymName}" instead of creating duplicate`;
+        } 
+        // If we're updating an existing gym
+        else if (gymSelect.value !== 'new') {
+          await firestoreDb.collection('gyms').doc(gymSelect.value).set(gymData, { merge: true });
+          console.log("Gym updated with ID:", gymSelect.value);
+          statusElement.textContent = 'Gym updated successfully!';
+        } 
+        // If we're adding a new gym and no gym with this name exists
+        else {
+          // Add creation metadata for new gyms
+          gymData.createdBy = user.uid;
+          gymData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          
+          const docRef = await firestoreDb.collection('gyms').add(gymData);
+          console.log("Gym added with ID:", docRef.id);
+          statusElement.textContent = 'Gym added successfully!';
+        }
+        
+        statusElement.className = 'status success';
+        document.getElementById('gymName').value = '';
+        document.getElementById('gymLocation').value = '';
+        
+        // Reset the select to "Add New Gym"
+        gymSelect.value = 'new';
+        
+        // Refresh the gym list
+        window.loadGyms();
+        
+      } catch (error) {
+        console.error('Error saving gym:', error);
+        statusElement.textContent = `Error saving gym: ${error.message}`;
+        statusElement.className = 'status error';
+      }
+    });
+
+    // Load gyms into select dropdown and list
+    window.loadGyms = async function() {
+      const gymSelect = document.getElementById('gymSelect');
+      const gymList = document.querySelector('.gym-list');
+      const statusElement = document.getElementById('gymStatus');
+      
+      try {
+        console.log("Loading gyms...");
+        statusElement.textContent = 'Loading gyms...';
+        statusElement.className = 'status';
+        
+        // Use the imported auth module instead of firebaseAuth
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          console.warn('No current user found in auth module, trying firebaseAuth');
+          // Try the global Firebase auth as fallback
+          const firebaseCurrentUser = firebaseAuth.currentUser;
+          if (!firebaseCurrentUser) {
+            throw new Error('You must be logged in to view gyms');
+          }
+        }
+        
+        const snapshot = await firestoreDb.collection('gyms').get();
+        
+        console.log("Gyms loaded:", snapshot.size);
+        
+        // Clear existing options except the first one
+        while (gymSelect.options.length > 1) {
+          gymSelect.remove(1);
+        }
+        
+        // Clear gym list
+        gymList.innerHTML = '<h3>Current Gym Locations</h3>';
+        
+        if (snapshot.empty) {
+          gymList.innerHTML += '<p>No gyms found. Add your first gym above.</p>';
+          statusElement.textContent = 'No gyms found';
+          statusElement.className = 'status';
+          return;
+        }
+        
+        snapshot.forEach(doc => {
+          const gym = doc.data();
+          console.log("Gym data:", doc.id, gym);
+          
+          // Add to select dropdown
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = gym.name || 'Unnamed Gym';
+          gymSelect.appendChild(option);
+          
+          // Add to gym list
+          const gymItem = document.createElement('div');
+          gymItem.className = 'gym-item';
+          
+          let lastUpdatedText = 'Never';
+          if (gym.lastUpdated) {
+            try {
+              lastUpdatedText = gym.lastUpdated.toDate ? gym.lastUpdated.toDate().toLocaleString() : new Date(gym.lastUpdated).toLocaleString();
+            } catch (e) {
+              console.error("Error formatting date:", e);
+              lastUpdatedText = 'Invalid date';
+            }
+          }
+          
+          gymItem.innerHTML = `
+            <h4>${gym.name || 'Unnamed Gym'}</h4>
+            ${gym.location ? `<p><strong>Location:</strong> ${gym.location}</p>` : ''}
+            <p><strong>ID:</strong> ${doc.id}</p>
+            <p><strong>Last Updated:</strong> ${lastUpdatedText}</p>
+          `;
+          gymList.appendChild(gymItem);
+        });
+        
+        statusElement.textContent = 'Gyms loaded successfully';
+        statusElement.className = 'status success';
+        
+      } catch (error) {
+        console.error('Error loading gyms:', error);
+        statusElement.textContent = `Error loading gyms: ${error.message}`;
+        statusElement.className = 'status error';
+      }
+    };
+
+    // Load gyms when the page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      if (auth.currentUser) {
+        loadGyms();
+      }
+    });
+
+    // Function to populate form when selecting a gym to edit
+    document.getElementById('gymSelect').addEventListener('change', async function() {
+      const gymId = this.value;
+      const gymNameInput = document.getElementById('gymName');
+      const gymLocationInput = document.getElementById('gymLocation');
+      
+      // Clear form if adding a new gym
+      if (gymId === 'new') {
+        gymNameInput.value = '';
+        gymLocationInput.value = '';
+        return;
+      }
+      
+      try {
+        // Get gym data from Firestore
+        const gymDoc = await firestoreDb.collection('gyms').doc(gymId).get();
+        
+        if (!gymDoc.exists) {
+          console.error('Gym not found:', gymId);
+          return;
+        }
+        
+        const gymData = gymDoc.data();
+        
+        // Populate form fields
+        gymNameInput.value = gymData.name || '';
+        gymLocationInput.value = gymData.location || '';
+        
+      } catch (error) {
+        console.error('Error loading gym details:', error);
+      }
+    });
+
+    // Add logout functionality
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        console.log("User signed out");
+        loginStatus.textContent = 'You have been signed out.';
+        loginStatus.className = 'status';
+        loginButton.disabled = false;
+      } catch (error) {
+        console.error("Error signing out:", error);
+        loginStatus.textContent = `Error signing out: ${error.message}`;
+        loginStatus.className = 'status error';
+      }
+    });
+
+    // Cleanup Tool Functionality
+    // Global state for cleanup tool
+    let autoCleanupInterval = null;
+    let firestoreAutoCleanupInterval = null;
+    let allConnections = {};
+    let allFirestoreDisplays = [];
+    
+    // Function to log messages to the log container
+    function log(message, type = 'info') {
+      const logContainer = document.getElementById('logContainer');
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      
+      const timestamp = new Date().toLocaleTimeString();
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    // Update the auto cleanup status UI
+    function updateAutoCleanupStatus(isActive) {
+      const autoStatusIndicator = document.querySelector('.auto-cleanup-indicator');
+      const autoStatusText = document.getElementById('autoStatus');
+      const toggleAutoCleanupBtn = document.getElementById('toggleAutoCleanupBtn');
+      
+      if (isActive) {
+        autoStatusIndicator.classList.remove('inactive');
+        autoStatusIndicator.classList.add('active');
+        autoStatusText.textContent = 'Active';
+        toggleAutoCleanupBtn.textContent = 'Stop Auto Cleanup';
+        toggleAutoCleanupBtn.classList.add('danger-btn');
+        toggleAutoCleanupBtn.classList.remove('secondary-btn');
+      } else {
+        autoStatusIndicator.classList.remove('active');
+        autoStatusIndicator.classList.add('inactive');
+        autoStatusText.textContent = 'Inactive';
+        toggleAutoCleanupBtn.textContent = 'Start Auto Cleanup';
+        toggleAutoCleanupBtn.classList.remove('danger-btn');
+        toggleAutoCleanupBtn.classList.add('secondary-btn');
+      }
+    }
+    
+    // Update the Firestore auto cleanup status UI
+    function updateFirestoreAutoCleanupStatus(isActive) {
+      const firestoreAutoStatusIndicator = document.querySelector('.firestore-auto-cleanup-indicator');
+      const firestoreAutoStatusText = document.getElementById('firestoreAutoStatus');
+      const toggleFirestoreAutoCleanupBtn = document.getElementById('toggleFirestoreAutoCleanupBtn');
+      
+      if (isActive) {
+        firestoreAutoStatusIndicator.classList.remove('inactive');
+        firestoreAutoStatusIndicator.classList.add('active');
+        firestoreAutoStatusText.textContent = 'Active';
+        toggleFirestoreAutoCleanupBtn.textContent = 'Stop Firestore Auto Cleanup';
+        toggleFirestoreAutoCleanupBtn.classList.add('danger-btn');
+        toggleFirestoreAutoCleanupBtn.classList.remove('secondary-btn');
+      } else {
+        firestoreAutoStatusIndicator.classList.remove('active');
+        firestoreAutoStatusIndicator.classList.add('inactive');
+        firestoreAutoStatusText.textContent = 'Inactive';
+        toggleFirestoreAutoCleanupBtn.textContent = 'Start Firestore Auto Cleanup';
+        toggleFirestoreAutoCleanupBtn.classList.remove('danger-btn');
+        toggleFirestoreAutoCleanupBtn.classList.add('secondary-btn');
+      }
+    }
+    
+    // Fetch all display connections from the database
+    async function fetchAllConnections() {
+      try {
+        const totalConnectionsEl = document.getElementById('totalConnections');
+        const staleConnectionsEl = document.getElementById('staleConnections');
+        const staleThresholdInput = document.getElementById('staleThreshold');
+        
+        log('Fetching all display connections...');
+        
+        const rtdb = firebase.database();
+        const displaysRef = rtdb.ref('displays');
+        
+        const snapshot = await displaysRef.once('value');
+        allConnections = snapshot.val() || {};
+        
+        const totalCount = Object.keys(allConnections).length;
+        totalConnectionsEl.textContent = totalCount;
+        
+        log(`Fetched ${totalCount} display connections`, 'success');
+        
+        // Count stale connections
+        const now = Date.now();
+        const staleThreshold = staleThresholdInput.value * 1000;
+        let staleCount = 0;
+        
+        for (const [displayId, data] of Object.entries(allConnections)) {
+          if (!data || !data.lastUpdated || (now - data.lastUpdated > staleThreshold)) {
+            staleCount++;
+          }
+        }
+        
+        staleConnectionsEl.textContent = staleCount;
+        
+        return allConnections;
+      } catch (error) {
+        log(`Error fetching connections: ${error.message}`, 'error');
+        return {};
+      }
+    }
+    
+    // Clean up stale display connections
+    async function cleanupConnections() {
+      try {
+        const now = Date.now();
+        const staleThresholdInput = document.getElementById('staleThreshold');
+        const staleThreshold = staleThresholdInput.value * 1000;
+        const lastCleanupTimeEl = document.getElementById('lastCleanupTime');
+        
+        log(`Starting cleanup with ${staleThreshold/1000} seconds threshold...`);
+        
+        // Refresh connections first
+        await fetchAllConnections();
+        
+        const rtdb = firebase.database();
+        const displaysRef = rtdb.ref('displays');
+        
+        let deletedCount = 0;
+        const totalCount = Object.keys(allConnections).length;
+        const deletePromises = [];
+        
+        for (const [displayId, data] of Object.entries(allConnections)) {
+          if (!data || !data.lastUpdated) {
+            log(`Display ${displayId} has no lastUpdated timestamp, removing it`);
+            deletePromises.push(displaysRef.child(displayId).remove());
+            deletedCount++;
+          } else {
+            const timeSinceUpdate = now - data.lastUpdated;
+            if (timeSinceUpdate > staleThreshold) {
+              log(`Display ${displayId} is stale (${Math.round(timeSinceUpdate/1000)} seconds old), removing it`);
+              deletePromises.push(displaysRef.child(displayId).remove());
+              deletedCount++;
+            }
+          }
+        }
+        
+        if (deletePromises.length > 0) {
+          await Promise.all(deletePromises);
+          log(`Cleanup complete: Removed ${deletedCount} stale connections out of ${totalCount} total`, 'success');
+        } else {
+          log('No stale connections found to clean up', 'info');
+        }
+        
+        // Update last cleanup time
+        const timeString = new Date().toLocaleTimeString();
+        lastCleanupTimeEl.textContent = timeString;
+        
+        // Refresh the connection list after cleanup
+        await fetchAllConnections();
+        
+        return { 
+          success: true, 
+          deletedCount, 
+          totalCount 
+        };
+      } catch (error) {
+        log(`Error during cleanup: ${error.message}`, 'error');
+        return { 
+          success: false, 
+          error: error.message 
+        };
+      }
+    }
+    
+    // Toggle automatic cleanup
+    function toggleAutoCleanup() {
+      if (autoCleanupInterval) {
+        // Stop auto cleanup
+        clearInterval(autoCleanupInterval);
+        autoCleanupInterval = null;
+        updateAutoCleanupStatus(false);
+        log('Automatic cleanup stopped', 'info');
+      } else {
+        // Start auto cleanup
+        const autoIntervalInput = document.getElementById('autoInterval');
+        const intervalMinutes = parseInt(autoIntervalInput.value, 10) || 5;
+        const intervalMs = intervalMinutes * 60 * 1000;
+        
+        // Run cleanup immediately
+        cleanupConnections();
+        
+        // Schedule recurring cleanup
+        autoCleanupInterval = setInterval(() => {
+          cleanupConnections();
+        }, intervalMs);
+        
+        updateAutoCleanupStatus(true);
+        log(`Automatic cleanup started (every ${intervalMinutes} minutes)`, 'success');
+      }
+    }
+    
+    // View all connections with details
+    function viewAllConnections() {
+      const logContainer = document.getElementById('logContainer');
+      const staleThresholdInput = document.getElementById('staleThreshold');
+      
+      logContainer.innerHTML = '';
+      
+      log('Displaying all connections:', 'info');
+      
+      const now = Date.now();
+      const staleThreshold = staleThresholdInput.value * 1000;
+      
+      if (Object.keys(allConnections).length === 0) {
+        log('No connections found in the database', 'info');
+        return;
+      }
+      
+      for (const [displayId, data] of Object.entries(allConnections)) {
+        if (!data || !data.lastUpdated) {
+          log(`Display ${displayId}: No timestamp (STALE)`, 'error');
+        } else {
+          const timeSinceUpdate = now - data.lastUpdated;
+          const isStale = timeSinceUpdate > staleThreshold;
+          const timestamp = new Date(data.lastUpdated).toLocaleString();
+          
+          if (isStale) {
+            log(`Display ${displayId}: Last updated ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp} (STALE)`, 'error');
+          } else {
+            log(`Display ${displayId}: Last updated ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp}`, 'success');
+          }
+        }
+      }
+    }
+    
+    // Fetch all Firestore displays
+    async function fetchFirestoreDisplays() {
+      try {
+        const firestoreTotalDisplaysEl = document.getElementById('firestoreTotalDisplays');
+        const firestoreStaleDisplaysEl = document.getElementById('firestoreStaleDisplays');
+        const firestoreStaleThresholdInput = document.getElementById('firestoreStaleThreshold');
+        
+        log('Fetching all Firestore displays...');
+        
+        const db = firebase.firestore();
+        const displaysRef = db.collection('displays');
+        
+        const snapshot = await displaysRef.get();
+        allFirestoreDisplays = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        const totalCount = allFirestoreDisplays.length;
+        firestoreTotalDisplaysEl.textContent = totalCount;
+        
+        log(`Fetched ${totalCount} Firestore displays`, 'success');
+        
+        // Count stale displays
+        const now = Date.now();
+        const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+        let staleCount = 0;
+        
+        for (const display of allFirestoreDisplays) {
+          const lastSeen = display.lastSeen ? new Date(display.lastSeen).getTime() : 0;
+          if (!display.lastSeen || (now - lastSeen > staleThreshold)) {
+            staleCount++;
+          }
+        }
+        
+        firestoreStaleDisplaysEl.textContent = staleCount;
+        
+        return allFirestoreDisplays;
+      } catch (error) {
+        log(`Error fetching Firestore displays: ${error.message}`, 'error');
+        return [];
+      }
+    }
+    
+    // Clean up stale Firestore displays
+    async function cleanupFirestoreDisplays() {
+      try {
+        const now = Date.now();
+        const firestoreStaleThresholdInput = document.getElementById('firestoreStaleThreshold');
+        const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+        const firestoreLastCleanupTimeEl = document.getElementById('firestoreLastCleanupTime');
+        
+        log(`Starting Firestore cleanup with ${staleThreshold/1000} seconds threshold...`);
+        
+        // Refresh displays first
+        await fetchFirestoreDisplays();
+        
+        const db = firebase.firestore();
+        const batch = db.batch();
+        let deletedCount = 0;
+        
+        for (const display of allFirestoreDisplays) {
+          const lastSeen = display.lastSeen ? new Date(display.lastSeen).getTime() : 0;
+          if (!display.lastSeen) {
+            log(`Display ${display.id} has no lastSeen timestamp, removing it`);
+            batch.delete(db.collection('displays').doc(display.id));
+            deletedCount++;
+          } else {
+            const timeSinceUpdate = now - lastSeen;
+            if (timeSinceUpdate > staleThreshold) {
+              log(`Display ${display.id} is stale (${Math.round(timeSinceUpdate/1000)} seconds old), removing it`);
+              batch.delete(db.collection('displays').doc(display.id));
+              deletedCount++;
+            }
+          }
+        }
+        
+        if (deletedCount > 0) {
+          await batch.commit();
+          log(`Firestore cleanup complete: Removed ${deletedCount} stale displays out of ${allFirestoreDisplays.length} total`, 'success');
+        } else {
+          log('No stale Firestore displays found to clean up', 'info');
+        }
+        
+        // Update last cleanup time
+        const timeString = new Date().toLocaleTimeString();
+        firestoreLastCleanupTimeEl.textContent = timeString;
+        
+        // Refresh the display list after cleanup
+        await fetchFirestoreDisplays();
+        
+        return {
+          success: true,
+          deletedCount,
+          totalCount: allFirestoreDisplays.length
+        };
+      } catch (error) {
+        log(`Error during Firestore cleanup: ${error.message}`, 'error');
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+    }
+    
+    // Toggle automatic Firestore cleanup
+    function toggleFirestoreAutoCleanup() {
+      if (firestoreAutoCleanupInterval) {
+        // Stop auto cleanup
+        clearInterval(firestoreAutoCleanupInterval);
+        firestoreAutoCleanupInterval = null;
+        updateFirestoreAutoCleanupStatus(false);
+        log('Automatic Firestore cleanup stopped', 'info');
+      } else {
+        // Start auto cleanup
+        const firestoreAutoIntervalInput = document.getElementById('firestoreAutoInterval');
+        const intervalMinutes = parseInt(firestoreAutoIntervalInput.value, 10) || 5;
+        const intervalMs = intervalMinutes * 60 * 1000;
+        
+        // Run cleanup immediately
+        cleanupFirestoreDisplays();
+        
+        // Schedule recurring cleanup
+        firestoreAutoCleanupInterval = setInterval(() => {
+          cleanupFirestoreDisplays();
+        }, intervalMs);
+        
+        updateFirestoreAutoCleanupStatus(true);
+        log(`Automatic Firestore cleanup started (every ${intervalMinutes} minutes)`, 'success');
+      }
+    }
+    
+    // View all Firestore displays with details
+    function viewFirestoreDisplays() {
+      const logContainer = document.getElementById('logContainer');
+      const firestoreStaleThresholdInput = document.getElementById('firestoreStaleThreshold');
+      
+      logContainer.innerHTML = '';
+      
+      log('Displaying all Firestore displays:', 'info');
+      
+      const now = Date.now();
+      const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+      
+      if (allFirestoreDisplays.length === 0) {
+        log('No displays found in Firestore', 'info');
+        return;
+      }
+      
+      for (const display of allFirestoreDisplays) {
+        if (!display.lastSeen) {
+          log(`Display ${display.id}: No timestamp (STALE)`, 'error');
+        } else {
+          const lastSeen = new Date(display.lastSeen).getTime();
+          const timeSinceUpdate = now - lastSeen;
+          const isStale = timeSinceUpdate > staleThreshold;
+          const timestamp = new Date(lastSeen).toLocaleString();
+          
+          if (isStale) {
+            log(`Display ${display.id}: Last seen ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp} (STALE)`, 'error');
+          } else {
+            log(`Display ${display.id}: Last seen ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp}`, 'success');
+          }
+        }
+      }
+    }
+    
+    // Clear the log
+    function clearLog() {
+      const logContainer = document.getElementById('logContainer');
+      logContainer.innerHTML = '';
+      log('Log cleared', 'info');
+    }
+    
+    // Initialize cleanup tool when tab is selected
+    function initCleanupTool() {
+      // Add event listeners for RTDB
+      document.getElementById('runCleanupBtn').addEventListener('click', cleanupConnections);
+      document.getElementById('toggleAutoCleanupBtn').addEventListener('click', toggleAutoCleanup);
+      document.getElementById('viewAllBtn').addEventListener('click', viewAllConnections);
+      
+      // Add event listeners for Firestore
+      document.getElementById('runFirestoreCleanupBtn').addEventListener('click', cleanupFirestoreDisplays);
+      document.getElementById('toggleFirestoreAutoCleanupBtn').addEventListener('click', toggleFirestoreAutoCleanup);
+      document.getElementById('viewFirestoreBtn').addEventListener('click', viewFirestoreDisplays);
+      
+      document.getElementById('clearLogBtn').addEventListener('click', clearLog);
+      
+      // Initialize the tool
+      log('Initializing cleanup tool...', 'info');
+      Promise.all([
+        fetchAllConnections(),
+        fetchFirestoreDisplays()
+      ]).then(() => {
+        log('Cleanup tool ready!', 'success');
+      });
+    }
+    
+    // Initialize cleanup tool when the cleanup tab is selected
+    document.querySelector('.tab[data-tab="cleanup"]').addEventListener('click', function() {
+      // Check if it's the first time selecting the tab
+      if (!document.getElementById('logContainer').innerHTML) {
+        initCleanupTool();
+      }
+    });
+    
+    // Add cleanup tool to the loadInitialData function
+    const originalLoadInitialData = window.loadInitialData || function() {};
+    window.loadInitialData = function() {
+      originalLoadInitialData();
+      
+      // If cleanup tab is active, initialize the cleanup tool
+      if (document.querySelector('.tab[data-tab="cleanup"]').classList.contains('active')) {
+        initCleanupTool();
+      }
+    };
+  </script>
+</body>
+</html> 

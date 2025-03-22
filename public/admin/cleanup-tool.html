@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Display Connection Cleanup Tool</title>
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #00BFFF;
+      margin-bottom: 20px;
+    }
+    
+    .control-panel {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    .primary-btn {
+      background-color: #00BFFF;
+      color: white;
+    }
+    
+    .primary-btn:hover {
+      background-color: #0099cc;
+    }
+    
+    .secondary-btn {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    
+    .secondary-btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .danger-btn {
+      background-color: #ff6b6b;
+      color: white;
+    }
+    
+    .danger-btn:hover {
+      background-color: #ff4040;
+    }
+    
+    .settings {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    label {
+      font-weight: bold;
+    }
+    
+    input[type="number"] {
+      width: 60px;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .log-container {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    
+    .info {
+      color: #0066cc;
+    }
+    
+    .success {
+      color: #4CAF50;
+    }
+    
+    .error {
+      color: #F44336;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e9f7fe;
+      border-radius: 5px;
+      border-left: 4px solid #00BFFF;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00BFFF;
+      margin: 5px 0;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .auto-cleanup-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .active {
+      background-color: #4CAF50;
+    }
+    
+    .inactive {
+      background-color: #F44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-container" style="display: none;">
+    <h1>Display Connection Cleanup Tool</h1>
+    
+    <div class="control-panel">
+      <h3>Realtime Database Cleanup</h3>
+      <div class="button-row">
+        <button id="runCleanupBtn" class="primary-btn">Run RTDB Cleanup Now</button>
+        <button id="toggleAutoCleanupBtn" class="secondary-btn">Start RTDB Auto Cleanup</button>
+        <button id="viewAllBtn" class="secondary-btn">View RTDB Connections</button>
+      </div>
+      
+      <div class="settings">
+        <label for="staleThreshold">Stale Threshold (seconds):</label>
+        <input type="number" id="staleThreshold" value="120" min="10" max="3600">
+        
+        <label for="autoInterval">Auto Cleanup Interval (minutes):</label>
+        <input type="number" id="autoInterval" value="2" min="1" max="60">
+        
+        <div>
+          <span>Auto Cleanup: </span>
+          <span class="auto-cleanup-indicator inactive"></span>
+          <span id="autoStatus">Inactive</span>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 20px;">Firestore Cleanup</h3>
+      <div class="button-row">
+        <button id="runFirestoreCleanupBtn" class="primary-btn">Run Firestore Cleanup Now</button>
+        <button id="toggleFirestoreAutoCleanupBtn" class="secondary-btn">Start Firestore Auto Cleanup</button>
+        <button id="viewFirestoreBtn" class="secondary-btn">View Firestore Displays</button>
+      </div>
+      
+      <div class="settings">
+        <label for="firestoreStaleThreshold">Stale Threshold (seconds):</label>
+        <input type="number" id="firestoreStaleThreshold" value="120" min="10" max="3600">
+        
+        <label for="firestoreAutoInterval">Auto Cleanup Interval (minutes):</label>
+        <input type="number" id="firestoreAutoInterval" value="2" min="1" max="60">
+        
+        <div>
+          <span>Auto Cleanup: </span>
+          <span class="firestore-auto-cleanup-indicator inactive"></span>
+          <span id="firestoreAutoStatus">Inactive</span>
+        </div>
+      </div>
+
+      <div class="button-row" style="margin-top: 20px;">
+        <button id="clearLogBtn" class="danger-btn">Clear Log</button>
+      </div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-label">Realtime Database</div>
+        <div class="stat-value" id="totalConnections">0</div>
+        <div class="stat-label">Total Connections</div>
+        <div class="stat-value" id="staleConnections">0</div>
+        <div class="stat-label">Stale Connections</div>
+        <div class="stat-value" id="lastCleanupTime">-</div>
+        <div class="stat-label">Last Cleanup</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Firestore</div>
+        <div class="stat-value" id="firestoreTotalDisplays">0</div>
+        <div class="stat-label">Total Displays</div>
+        <div class="stat-value" id="firestoreStaleDisplays">0</div>
+        <div class="stat-label">Stale Displays</div>
+        <div class="stat-value" id="firestoreLastCleanupTime">-</div>
+        <div class="stat-label">Last Cleanup</div>
+      </div>
+    </div>
+    
+    <h3>Activity Log</h3>
+    <div id="logContainer" class="log-container"></div>
+  </div>
+  
+  <div id="auth-container" class="container" style="max-width: 400px; margin-top: 100px;">
+    <div class="logo" style="text-align: center; margin-bottom: 20px; font-weight: bold; color: #00BFFF; font-size: 16px;">Simplix Gym Rewards</div>
+    <h1>Authentication Required</h1>
+    <p style="text-align: center;">You need to be logged in as an admin to use this tool.</p>
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="index.html" class="primary-btn" style="display: inline-block; text-decoration: none; padding: 10px 20px;">Go to Login Page</a>
+    </div>
+  </div>
+  
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+      authDomain: window.location.hostname.includes('web.app') 
+        ? "simplixgymrewards.web.app" 
+        : "simplixgymrewards.firebaseapp.com",
+      databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "simplixgymrewards",
+      storageBucket: "simplixgymrewards.firebasestorage.app",
+      messagingSenderId: "821049711023",
+      appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // Check authentication before showing tool
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in, check if they are an admin
+        firebase.firestore().collection('users').doc(user.uid).get()
+          .then(doc => {
+            if (doc.exists && doc.data().isAdmin === true) {
+              // Show admin tool
+              document.getElementById('auth-container').style.display = 'none';
+              document.getElementById('main-container').style.display = 'block';
+              // Initialize the tool
+              initTool();
+            } else {
+              // Not an admin, show auth screen
+              document.getElementById('auth-container').style.display = 'block';
+              document.getElementById('main-container').style.display = 'none';
+            }
+          })
+          .catch(error => {
+            console.error('Error checking admin status:', error);
+            document.getElementById('auth-container').style.display = 'block';
+            document.getElementById('main-container').style.display = 'none';
+          });
+      } else {
+        // User is not signed in, show auth screen
+        document.getElementById('auth-container').style.display = 'block';
+        document.getElementById('main-container').style.display = 'none';
+      }
+    });
+    
+    // Initialize UI elements
+    const runCleanupBtn = document.getElementById('runCleanupBtn');
+    const toggleAutoCleanupBtn = document.getElementById('toggleAutoCleanupBtn');
+    const viewAllBtn = document.getElementById('viewAllBtn');
+    const runFirestoreCleanupBtn = document.getElementById('runFirestoreCleanupBtn');
+    const toggleFirestoreAutoCleanupBtn = document.getElementById('toggleFirestoreAutoCleanupBtn');
+    const viewFirestoreBtn = document.getElementById('viewFirestoreBtn');
+    const clearLogBtn = document.getElementById('clearLogBtn');
+    
+    const staleThresholdInput = document.getElementById('staleThreshold');
+    const autoIntervalInput = document.getElementById('autoInterval');
+    const firestoreStaleThresholdInput = document.getElementById('firestoreStaleThreshold');
+    const firestoreAutoIntervalInput = document.getElementById('firestoreAutoInterval');
+    
+    const autoStatusIndicator = document.querySelector('.auto-cleanup-indicator');
+    const firestoreAutoStatusIndicator = document.querySelector('.firestore-auto-cleanup-indicator');
+    const autoStatusText = document.getElementById('autoStatus');
+    const firestoreAutoStatusText = document.getElementById('firestoreAutoStatus');
+    
+    const totalConnectionsEl = document.getElementById('totalConnections');
+    const staleConnectionsEl = document.getElementById('staleConnections');
+    const lastCleanupTimeEl = document.getElementById('lastCleanupTime');
+    const firestoreTotalDisplaysEl = document.getElementById('firestoreTotalDisplays');
+    const firestoreStaleDisplaysEl = document.getElementById('firestoreStaleDisplays');
+    const firestoreLastCleanupTimeEl = document.getElementById('firestoreLastCleanupTime');
+    
+    const logContainer = document.getElementById('logContainer');
+    
+    // Global state
+    let autoCleanupInterval = null;
+    let firestoreAutoCleanupInterval = null;
+    let allConnections = {};
+    let allFirestoreDisplays = [];
+    
+    // Log a message to the log container
+    function log(message, type = 'info') {
+      const logEntry = document.createElement('div');
+      logEntry.className = type;
+      
+      const timestamp = new Date().toLocaleTimeString();
+      logEntry.textContent = `[${timestamp}] ${message}`;
+      
+      logContainer.appendChild(logEntry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    // Update the auto cleanup status UI
+    function updateAutoCleanupStatus(isActive) {
+      if (isActive) {
+        autoStatusIndicator.classList.remove('inactive');
+        autoStatusIndicator.classList.add('active');
+        autoStatusText.textContent = 'Active';
+        toggleAutoCleanupBtn.textContent = 'Stop Auto Cleanup';
+        toggleAutoCleanupBtn.classList.add('danger-btn');
+        toggleAutoCleanupBtn.classList.remove('secondary-btn');
+      } else {
+        autoStatusIndicator.classList.remove('active');
+        autoStatusIndicator.classList.add('inactive');
+        autoStatusText.textContent = 'Inactive';
+        toggleAutoCleanupBtn.textContent = 'Start Auto Cleanup';
+        toggleAutoCleanupBtn.classList.remove('danger-btn');
+        toggleAutoCleanupBtn.classList.add('secondary-btn');
+      }
+    }
+    
+    // Fetch all display connections from the database
+    async function fetchAllConnections() {
+      try {
+        const db = firebase.database();
+        const displaysRef = db.ref('displays');
+        
+        log('Fetching all display connections...');
+        
+        const snapshot = await displaysRef.once('value');
+        allConnections = snapshot.val() || {};
+        
+        const totalCount = Object.keys(allConnections).length;
+        totalConnectionsEl.textContent = totalCount;
+        
+        log(`Fetched ${totalCount} display connections`, 'success');
+        
+        // Count stale connections
+        const now = Date.now();
+        const staleThreshold = staleThresholdInput.value * 1000;
+        let staleCount = 0;
+        
+        for (const [displayId, data] of Object.entries(allConnections)) {
+          if (!data || !data.lastUpdated || (now - data.lastUpdated > staleThreshold)) {
+            staleCount++;
+          }
+        }
+        
+        staleConnectionsEl.textContent = staleCount;
+        
+        return allConnections;
+      } catch (error) {
+        log(`Error fetching connections: ${error.message}`, 'error');
+        return {};
+      }
+    }
+    
+    // Clean up stale display connections
+    async function cleanupConnections() {
+      try {
+        const now = Date.now();
+        const staleThreshold = staleThresholdInput.value * 1000;
+        
+        log(`Starting cleanup with ${staleThreshold/1000} seconds threshold...`);
+        
+        // Refresh connections first
+        await fetchAllConnections();
+        
+        const db = firebase.database();
+        const displaysRef = db.ref('displays');
+        
+        let deletedCount = 0;
+        const totalCount = Object.keys(allConnections).length;
+        const deletePromises = [];
+        
+        for (const [displayId, data] of Object.entries(allConnections)) {
+          if (!data || !data.lastUpdated) {
+            log(`Display ${displayId} has no lastUpdated timestamp, removing it`);
+            deletePromises.push(displaysRef.child(displayId).remove());
+            deletedCount++;
+          } else {
+            const timeSinceUpdate = now - data.lastUpdated;
+            if (timeSinceUpdate > staleThreshold) {
+              log(`Display ${displayId} is stale (${Math.round(timeSinceUpdate/1000)} seconds old), removing it`);
+              deletePromises.push(displaysRef.child(displayId).remove());
+              deletedCount++;
+            }
+          }
+        }
+        
+        if (deletePromises.length > 0) {
+          await Promise.all(deletePromises);
+          log(`Cleanup complete: Removed ${deletedCount} stale connections out of ${totalCount} total`, 'success');
+        } else {
+          log('No stale connections found to clean up', 'info');
+        }
+        
+        // Update last cleanup time
+        const timeString = new Date().toLocaleTimeString();
+        lastCleanupTimeEl.textContent = timeString;
+        
+        // Refresh the connection list after cleanup
+        await fetchAllConnections();
+        
+        return { 
+          success: true, 
+          deletedCount, 
+          totalCount 
+        };
+      } catch (error) {
+        log(`Error during cleanup: ${error.message}`, 'error');
+        return { 
+          success: false, 
+          error: error.message 
+        };
+      }
+    }
+    
+    // Toggle automatic cleanup
+    function toggleAutoCleanup() {
+      if (autoCleanupInterval) {
+        // Stop auto cleanup
+        clearInterval(autoCleanupInterval);
+        autoCleanupInterval = null;
+        updateAutoCleanupStatus(false);
+        log('Automatic cleanup stopped', 'info');
+      } else {
+        // Start auto cleanup
+        const intervalMinutes = parseInt(autoIntervalInput.value, 10) || 5;
+        const intervalMs = intervalMinutes * 60 * 1000;
+        
+        // Run cleanup immediately
+        cleanupConnections();
+        
+        // Schedule recurring cleanup
+        autoCleanupInterval = setInterval(() => {
+          cleanupConnections();
+        }, intervalMs);
+        
+        updateAutoCleanupStatus(true);
+        log(`Automatic cleanup started (every ${intervalMinutes} minutes)`, 'success');
+      }
+    }
+    
+    // View all connections with details
+    function viewAllConnections() {
+      logContainer.innerHTML = '';
+      
+      log('Displaying all connections:', 'info');
+      
+      const now = Date.now();
+      const staleThreshold = staleThresholdInput.value * 1000;
+      
+      if (Object.keys(allConnections).length === 0) {
+        log('No connections found in the database', 'info');
+        return;
+      }
+      
+      for (const [displayId, data] of Object.entries(allConnections)) {
+        if (!data || !data.lastUpdated) {
+          log(`Display ${displayId}: No timestamp (STALE)`, 'error');
+        } else {
+          const timeSinceUpdate = now - data.lastUpdated;
+          const isStale = timeSinceUpdate > staleThreshold;
+          const timestamp = new Date(data.lastUpdated).toLocaleString();
+          
+          if (isStale) {
+            log(`Display ${displayId}: Last updated ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp} (STALE)`, 'error');
+          } else {
+            log(`Display ${displayId}: Last updated ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp}`, 'success');
+          }
+        }
+      }
+    }
+    
+    // Update the Firestore auto cleanup status UI
+    function updateFirestoreAutoCleanupStatus(isActive) {
+      if (isActive) {
+        firestoreAutoStatusIndicator.classList.remove('inactive');
+        firestoreAutoStatusIndicator.classList.add('active');
+        firestoreAutoStatusText.textContent = 'Active';
+        toggleFirestoreAutoCleanupBtn.textContent = 'Stop Firestore Auto Cleanup';
+        toggleFirestoreAutoCleanupBtn.classList.add('danger-btn');
+        toggleFirestoreAutoCleanupBtn.classList.remove('secondary-btn');
+      } else {
+        firestoreAutoStatusIndicator.classList.remove('active');
+        firestoreAutoStatusIndicator.classList.add('inactive');
+        firestoreAutoStatusText.textContent = 'Inactive';
+        toggleFirestoreAutoCleanupBtn.textContent = 'Start Firestore Auto Cleanup';
+        toggleFirestoreAutoCleanupBtn.classList.remove('danger-btn');
+        toggleFirestoreAutoCleanupBtn.classList.add('secondary-btn');
+      }
+    }
+    
+    // Fetch all Firestore displays
+    async function fetchFirestoreDisplays() {
+      try {
+        const db = firebase.firestore();
+        const displaysRef = db.collection('displays');
+        
+        log('Fetching all Firestore displays...');
+        
+        const snapshot = await displaysRef.get();
+        allFirestoreDisplays = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        const totalCount = allFirestoreDisplays.length;
+        firestoreTotalDisplaysEl.textContent = totalCount;
+        
+        log(`Fetched ${totalCount} Firestore displays`, 'success');
+        
+        // Count stale displays
+        const now = Date.now();
+        const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+        let staleCount = 0;
+        
+        for (const display of allFirestoreDisplays) {
+          const lastSeen = new Date(display.lastSeen).getTime();
+          if (!display.lastSeen || (now - lastSeen > staleThreshold)) {
+            staleCount++;
+          }
+        }
+        
+        firestoreStaleDisplaysEl.textContent = staleCount;
+        
+        return allFirestoreDisplays;
+      } catch (error) {
+        log(`Error fetching Firestore displays: ${error.message}`, 'error');
+        return [];
+      }
+    }
+    
+    // Clean up stale Firestore displays
+    async function cleanupFirestoreDisplays() {
+      try {
+        const now = Date.now();
+        const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+        
+        log(`Starting Firestore cleanup with ${staleThreshold/1000} seconds threshold...`);
+        
+        // Refresh displays first
+        await fetchFirestoreDisplays();
+        
+        const db = firebase.firestore();
+        const batch = db.batch();
+        let deletedCount = 0;
+        
+        for (const display of allFirestoreDisplays) {
+          const lastSeen = new Date(display.lastSeen).getTime();
+          if (!display.lastSeen) {
+            log(`Display ${display.id} has no lastSeen timestamp, removing it`);
+            batch.delete(db.collection('displays').doc(display.id));
+            deletedCount++;
+          } else {
+            const timeSinceUpdate = now - lastSeen;
+            if (timeSinceUpdate > staleThreshold) {
+              log(`Display ${display.id} is stale (${Math.round(timeSinceUpdate/1000)} seconds old), removing it`);
+              batch.delete(db.collection('displays').doc(display.id));
+              deletedCount++;
+            }
+          }
+        }
+        
+        if (deletedCount > 0) {
+          await batch.commit();
+          log(`Firestore cleanup complete: Removed ${deletedCount} stale displays out of ${allFirestoreDisplays.length} total`, 'success');
+        } else {
+          log('No stale Firestore displays found to clean up', 'info');
+        }
+        
+        // Update last cleanup time
+        const timeString = new Date().toLocaleTimeString();
+        firestoreLastCleanupTimeEl.textContent = timeString;
+        
+        // Refresh the display list after cleanup
+        await fetchFirestoreDisplays();
+        
+        return {
+          success: true,
+          deletedCount,
+          totalCount: allFirestoreDisplays.length
+        };
+      } catch (error) {
+        log(`Error during Firestore cleanup: ${error.message}`, 'error');
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+    }
+    
+    // Toggle automatic Firestore cleanup
+    function toggleFirestoreAutoCleanup() {
+      if (firestoreAutoCleanupInterval) {
+        // Stop auto cleanup
+        clearInterval(firestoreAutoCleanupInterval);
+        firestoreAutoCleanupInterval = null;
+        updateFirestoreAutoCleanupStatus(false);
+        log('Automatic Firestore cleanup stopped', 'info');
+      } else {
+        // Start auto cleanup
+        const intervalMinutes = parseInt(firestoreAutoIntervalInput.value, 10) || 5;
+        const intervalMs = intervalMinutes * 60 * 1000;
+        
+        // Run cleanup immediately
+        cleanupFirestoreDisplays();
+        
+        // Schedule recurring cleanup
+        firestoreAutoCleanupInterval = setInterval(() => {
+          cleanupFirestoreDisplays();
+        }, intervalMs);
+        
+        updateFirestoreAutoCleanupStatus(true);
+        log(`Automatic Firestore cleanup started (every ${intervalMinutes} minutes)`, 'success');
+      }
+    }
+    
+    // View all Firestore displays with details
+    function viewFirestoreDisplays() {
+      logContainer.innerHTML = '';
+      
+      log('Displaying all Firestore displays:', 'info');
+      
+      const now = Date.now();
+      const staleThreshold = firestoreStaleThresholdInput.value * 1000;
+      
+      if (allFirestoreDisplays.length === 0) {
+        log('No displays found in Firestore', 'info');
+        return;
+      }
+      
+      for (const display of allFirestoreDisplays) {
+        if (!display.lastSeen) {
+          log(`Display ${display.id}: No timestamp (STALE)`, 'error');
+        } else {
+          const lastSeen = new Date(display.lastSeen).getTime();
+          const timeSinceUpdate = now - lastSeen;
+          const isStale = timeSinceUpdate > staleThreshold;
+          const timestamp = new Date(lastSeen).toLocaleString();
+          
+          if (isStale) {
+            log(`Display ${display.id}: Last seen ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp} (STALE)`, 'error');
+          } else {
+            log(`Display ${display.id}: Last seen ${Math.round(timeSinceUpdate/1000)}s ago at ${timestamp}`, 'success');
+          }
+        }
+      }
+    }
+    
+    // Clear the log
+    function clearLog() {
+      logContainer.innerHTML = '';
+      log('Log cleared', 'info');
+    }
+    
+    function initTool() {
+      // Add event listeners for RTDB
+      runCleanupBtn.addEventListener('click', cleanupConnections);
+      toggleAutoCleanupBtn.addEventListener('click', toggleAutoCleanup);
+      viewAllBtn.addEventListener('click', viewAllConnections);
+      
+      // Add event listeners for Firestore
+      runFirestoreCleanupBtn.addEventListener('click', cleanupFirestoreDisplays);
+      toggleFirestoreAutoCleanupBtn.addEventListener('click', toggleFirestoreAutoCleanup);
+      viewFirestoreBtn.addEventListener('click', viewFirestoreDisplays);
+      
+      clearLogBtn.addEventListener('click', clearLog);
+      
+      // Initialize the app
+      log('Initializing cleanup tool...', 'info');
+      Promise.all([
+        fetchAllConnections(),
+        fetchFirestoreDisplays()
+      ]).then(() => {
+        log('Cleanup tool ready!', 'success');
+      });
+    }
+  </script>
+</body>
+</html> 

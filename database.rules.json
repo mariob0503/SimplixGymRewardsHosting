@@ -1,0 +1,32 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "displays": {
+      ".read": true,
+      ".write": true,
+      "$displayId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('isAdmin').val() === true || auth.token.email === 'mario@simplix.solutions')"
+      }
+    },
+    
+    "gyms": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('isAdmin').val() === true || auth.token.email === 'mario@simplix.solutions')"
+    },
+    
+    "game-results": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

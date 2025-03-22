@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lift & Earn - Success</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Copy styles from bigbangindex.html */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #121212;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            color: #ffffff;
+        }
+        #bgCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #backButton {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            background-color: #0091EA;
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+    </style>
+    <!-- Only required Three.js libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.125.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.125.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.min.js"></script>
+    <!-- Our custom modules -->
+    <script src="simulation.js"></script>
+</head>
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <button id="backButton">Back</button>
+    <script>
+        document.getElementById('backButton').addEventListener('click', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const displayId = urlParams.get('display');
+            window.location.href = `/?display=${displayId}`;
+        });
+        // Start simulation when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("Success page loaded with params:", window.location.search);
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoclose = urlParams.get('autoclose');
+            const displayId = urlParams.get('display');
+            
+            console.log("Starting simulation");
+            // Start simulation
+            Simulation.start();
+            
+            // If autoclose is set, don't show the back button and set a timeout
+            if (autoclose === 'true') {
+                console.log("Autoclose is true, hiding back button");
+                document.getElementById('backButton').style.display = 'none';
+                
+                // For display, we'll let the parent handle the timeout
+                // For controller, we'll handle it here
+                if (!window.parent || window.parent === window) {
+                    console.log("Setting up autoclose timeout");
+                    setTimeout(() => {
+                        console.log("Autoclose timeout triggered");
+                        // If we're in an iframe on the controller, send a message to parent
+                        if (window.parent && window.parent !== window) {
+                            console.log("Sending message to parent");
+                            window.parent.postMessage('animation-complete', '*');
+                        } else {
+                            // If we're not in an iframe, redirect back
+                            console.log("Redirecting back");
+                            window.location.href = displayId ? 
+                                `/controller.html?code=${displayId}` : 
+                                '/';
+                        }
+                    }, 5000);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplix Gym Rewards - Image Sequence Game</title>
+    <style>
+        /* Existing styles remain unchanged */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+            box-shadow: 0 0 5px #FFFFFF, 0 0 10px #FFFFFF, 0 0 15px #FFFFFF;
+            padding: 1.5rem 1rem;
+            margin-top: 3rem;
+        }
+        header h1 {
+            font-size: 3rem;
+            margin: 0;
+        }
+        header h1 span {
+            color: #00BFFF;
+        }
+        header h3 {
+            font-size: 1.3rem;
+            margin: 0.5rem 0 0 0;
+        }
+        #game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+            position: relative;
+            margin: 2rem 0;
+            max-width: 90%;
+            width: 100%;
+        }
+        #topImages {
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        #topImages img {
+            flex: 0 0 auto;
+            width: calc(33.33% - 10px);
+            max-width: 100px;
+            height: auto;
+            aspect-ratio: 1/1;
+            margin: 5px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            object-fit: contain;
+        }
+        #bottomImages {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #bottomImages img {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid #333;
+            border-radius: 5px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        #bottomImages img:hover {
+            transform: scale(1.1);
+            border-color: #00BFFF;
+        }
+        #bottomImages img.selected {
+            border-color: #00BFFF;
+            box-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF;
+        }
+        #timer {
+            font-size: 24px;
+            margin-top: 15px;
+            color: #00BFFF;
+            font-weight: bold;
+        }
+        #score {
+            font-size: 22px;
+            margin-top: 10px;
+            color: #00BFFF;
+        }
+        #leaderboard {
+            text-align: center;
+            padding: 20px;
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+            max-width: 90%;
+            margin: 2rem 0;
+        }
+        #leaderboard h2 {
+            color: #00BFFF;
+        }
+        #scoreList {
+            list-style: none;
+            padding: 0;
+        }
+        #scoreList li {
+            font-size: 18px;
+            margin: 5px 0;
+            color: #E0E0E0;
+        }
+        button {
+            background-color: #00BFFF;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF;
+        }
+        button:hover {
+            background-color: #009acd;
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .glow-effect {
+            filter: brightness(150%) blur(2px);
+            opacity: 0.5;
+        }
+        #rocket {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            transition: bottom 2s ease-out;
+        }
+        .firework {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        /* Sound control button */
+        #soundControl {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 2px solid #00BFFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .sound-wave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+        }
+        /* Responsive media queries remain unchanged */
+    </style>
+</head>
+<body>
+    <div id="soundControl">
+        <svg class="sound-wave" viewBox="0 0 24 24" fill="white">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+    </div>
+
+    <header>
+        <h1>Lift and <span>Earn</span></h1>
+        <h3>Simplix Gym Rewards</h3>
+    </header>
+    
+    <div id="game">
+        <div id="topImages">
+            <img id="top1">
+            <img id="top2">
+            <img id="top3">
+        </div>
+        <div id="bottomImages"></div>
+        <div id="timer">Time: 30.0s</div>
+        <div id="score">Score: 0 (Round: 1)</div>
+    </div>
+    
+    <div id="leaderboard" style="display: none;">
+        <h2>Leaderboard</h2>
+        <ul id="scoreList"></ul>
+        <button id="playAgain">Play Again</button>
+    </div>
+    
+    <img id="rocket" src="assets/images/rocket.png" style="display: none;">
+
+    <script>
+        //26.02.2025 start// 
+        // Audio Context for sound effects
+        let audioContext;
+        let isSoundEnabled = true;
+        const soundControl = document.getElementById('soundControl');
+
+        // Initialize audio context (will be created on first user interaction)
+        function initAudio() {
+            if (!audioContext && isSoundEnabled) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Sound toggle function
+        soundControl.addEventListener('click', () => {
+            isSoundEnabled = !isSoundEnabled;
+            if (isSoundEnabled) {
+                soundControl.style.opacity = '1';
+                if (!audioContext) initAudio();
+                playSound('toggle', 0.5);
+            } else {
+                soundControl.style.opacity = '0.5';
+                playSound('toggle', 0.3);
+            }
+            // Provide haptic feedback
+            triggerHapticFeedback(50);
+        });
+
+        // Function to check if haptic feedback is available
+        function isHapticAvailable() {
+            return 'vibrate' in navigator;
+        }
+
+        // Function to trigger haptic feedback
+        function triggerHapticFeedback(pattern) {
+            if (isHapticAvailable() && isSoundEnabled) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // Function to play sound effects
+        function playSound(type, volume = 0.5) {
+            if (!isSoundEnabled || !audioContext) return;
+            
+            // Create oscillator for synthesized sounds
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            // Connect nodes
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Set volume
+            gainNode.gain.value = volume;
+            
+            // Different sound configurations based on type
+            switch(type) {
+                case 'select':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+                case 'correct':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.exponentialRampToValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.exponentialRampToValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                    break;
+                case 'wrong':
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime); // F4
+                    oscillator.frequency.exponentialRampToValueAtTime(277.18, audioContext.currentTime + 0.2); // C#4
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+                case 'timeWarning':
+                    oscillator.type = 'square';
+                    oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.15);
+                    break;
+                case 'button':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.15);
+                    break;
+                case 'toggle':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(isSoundEnabled ? 440 : 330, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+                case 'firework':
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime); // C6
+                    oscillator.frequency.exponentialRampToValueAtTime(523.25, audioContext.currentTime + 0.3); // C5
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                    break;
+                case 'gameOver':
+                    // Play a sequence of tones
+                    oscillator.type = 'triangle';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+                    oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.2); // F4
+                    oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.4); // D4
+                    gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                    break;
+                case 'rocket':
+                    // Rocket launch sound (woosh)
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 1);
+                    gainNode.gain.setValueAtTime(0.01, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 0.2);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 1.5);
+                    break;
+            }
+        }
+        //26.02.2025 end//
+
+        const images = [
+            'assets/images/image1.png',
+            'assets/images/image2.png',
+            'assets/images/image3.png',
+            'assets/images/image4.png',
+            'assets/images/image5.png',
+            'assets/images/image6.png',
+            'assets/images/image7.png',
+            'assets/images/image8.png',
+            'assets/images/image9.png'
+        ];
+        let topSequence = [];
+        let bottomImages = [];
+        let selection = [];
+        let round = 1;
+        let score = 0;
+        let timeLeft = 30;
+        let timerId;
+        let totalRounds = 0;
+
+        const gameDiv = document.getElementById('game');
+        const topImages = [document.getElementById('top1'), document.getElementById('top2'), document.getElementById('top3')];
+        const bottomImagesDiv = document.getElementById('bottomImages');
+        const timerDiv = document.getElementById('timer');
+        const scoreDiv = document.getElementById('score');
+        const leaderboardDiv = document.getElementById('leaderboard');
+        const scoreList = document.getElementById('scoreList');
+        const playAgainButton = document.getElementById('playAgain');
+        const rocket = document.getElementById('rocket');
+
+        //26.02.2025 start//
+        // Add listeners for first interaction to init audio
+        document.addEventListener('click', initAudio, {once: true});
+        document.addEventListener('touchstart', initAudio, {once: true});
+        //26.02.2025 end//
+
+        playAgainButton.addEventListener('click', () => {
+            //26.02.2025 start//
+            playSound('button', 0.6);
+            triggerHapticFeedback(80);
+            //26.02.2025 end//
+            startGame();
+        });
+        
+        window.onload = startGame;
+
+        function startGame() {
+            round = 1;
+            score = 0;
+            timeLeft = 30;
+            totalRounds = 0;
+            selection = [];
+            gameDiv.style.display = 'flex';
+            leaderboardDiv.style.display = 'none';
+            rocket.style.display = 'none';
+            setupRound();
+            startGameTimer();
+        }
+
+        function startGameTimer() {
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                timeLeft -= 0.1;
+                timerDiv.textContent = `Time: ${Math.max(timeLeft, 0).toFixed(1)}s`;
+                
+                //26.02.2025 start//
+                // Add sound warnings when time is running low
+                if (timeLeft <= 10 && timeLeft >= 9.9) {
+                    playSound('timeWarning', 0.3);
+                    triggerHapticFeedback(50);
+                } else if (timeLeft <= 5 && timeLeft >= 4.9) {
+                    playSound('timeWarning', 0.4);
+                    triggerHapticFeedback([50, 50]);
+                } else if (timeLeft <= 3 && Math.round(timeLeft * 10) % 10 === 0) {
+                    // Play warning sound every second when time ≤ 3s
+                    playSound('timeWarning', 0.5);
+                    triggerHapticFeedback([30, 30, 30]);
+                }
+                //26.02.2025 end//
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    //26.02.2025 start//
+                    playSound('gameOver', 0.7);
+                    triggerHapticFeedback([100, 50, 100]);
+                    //26.02.2025 end//
+                    endGameSequence();
+                }
+            }, 100);
+        }
+
+        function setupRound() {
+            topSequence = [];
+            while (topSequence.length < 3) {
+                const idx = Math.floor(Math.random() * 9);
+                if (!topSequence.includes(idx)) {
+                    topSequence.push(idx);
+                }
+            }
+            bottomImages = [...Array(9).keys()];
+            shuffle(bottomImages);
+            topImages.forEach((img, i) => {
+                img.src = images[topSequence[i]];
+                img.classList.remove('glow-effect');
+            });
+            bottomImagesDiv.innerHTML = '';
+            bottomImages.forEach((idx) => {
+                const img = document.createElement('img');
+                img.src = images[idx];
+                img.dataset.index = idx;
+                img.addEventListener('click', () => selectImage(idx));
+                if (round > 10) img.classList.add('glow-effect');
+                bottomImagesDiv.appendChild(img);
+            });
+            selection = [];
+            scoreDiv.textContent = `Score: ${score} (Round: ${round})`;
+        }
+
+        function selectImage(idx) {
+            if (selection.length < 3 && !selection.includes(idx)) {
+                selection.push(idx);
+                const img = bottomImagesDiv.querySelector(`img[data-index="${idx}"]`);
+                img.classList.add('selected');
+                
+                //26.02.2025 start//
+                // Play selection sound and vibrate
+                playSound('select', 0.4);
+                triggerHapticFeedback(30);
+                //26.02.2025 end//
+                
+                if (selection.length === 3) {
+                    checkSequence();
+                }
+            }
+        }
+
+        function checkSequence() {
+            if (JSON.stringify(selection) === JSON.stringify(topSequence)) {
+                if (round <= 5) {
+                    score += 5;
+                } else {
+                    score += 10;
+                }
+                totalRounds++;
+                round++;
+                
+                //26.02.2025 start//
+                // Correct sequence feedback
+                playSound('correct', 0.6);
+                triggerHapticFeedback([50, 30, 70]);
+                //26.02.2025 end//
+                
+                setupRound();
+            } else {
+                //26.02.2025 start//
+                // Wrong sequence feedback
+                playSound('wrong', 0.5);
+                triggerHapticFeedback([100, 100]);
+                //26.02.2025 end//
+                
+                endGameSequence();
+            }
+        }
+
+        function endGameSequence() {
+            clearInterval(timerId);
+            document.querySelectorAll('#topImages img, #bottomImages img').forEach(img => {
+                img.src = 'assets/images/image2.png';
+                img.classList.remove('glow-effect');
+            });
+            
+            const successMessage = document.createElement('div');
+            successMessage.style.fontSize = '24px';
+            successMessage.style.color = '#00BFFF';
+            successMessage.style.textAlign = 'center';
+            successMessage.style.margin = '20px 0';
+            successMessage.innerHTML = `
+                <p>Great job!</p>
+                <p>Total Rounds: ${totalRounds}</p>
+                <p>Total Score: ${score}</p>
+            `;
+            
+            gameDiv.appendChild(successMessage);
+            
+            setTimeout(() => {
+                gameDiv.style.display = 'none';
+                leaderboardDiv.style.display = 'block';
+                showLeaderboard();
+            }, 2000); // Changed to 2 seconds
+        }
+
+        function showLeaderboard() {
+            const playerName = prompt("Please enter your name:", "Player");
+            const name = playerName ? playerName : "Anonymous";
+            
+            let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+            gameResults.push({ name: name, score: score, rounds: totalRounds });
+            
+            gameResults.sort((a, b) => b.score - a.score);
+            
+            localStorage.setItem('gameResults', JSON.stringify(gameResults));
+            scoreList.innerHTML = '';
+            
+            gameResults.slice(0, 5).forEach((result, i) => {
+                const li = document.createElement('li');
+                li.textContent = `${i + 1}. ${result.name} - Rounds: ${result.rounds} | Points: ${result.score}`;
+                scoreList.appendChild(li);
+            });
+
+            //26.02.2025 start//
+            // Rocket launch sound
+            setTimeout(() => {
+                playSound('rocket', 0.7);
+                triggerHapticFeedback([50, 100, 150, 200]);
+            }, 100);
+            //26.02.2025 end//
+
+            rocket.style.display = 'block';
+            setTimeout(() => {
+                rocket.style.bottom = '100%';
+            }, 100);
+
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    createFirework();
+                    //26.02.2025 start//
+                    // Add firework sounds and haptics
+                    playSound('firework', 0.3 + (Math.random() * 0.3));
+                    triggerHapticFeedback(30 + Math.floor(Math.random() * 50));
+                    //26.02.2025 end//
+                }, i * 200);
+            }
+        }
+
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = `${Math.random() * 100}%`;
+            firework.style.top = `${Math.random() * 100}%`;
+            firework.style.background = `#00BFFF`;
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1000);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // The returnToController function remains, though it won't be used without the button
+        function returnToController() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const displayId = urlParams.get('display');
+            window.location.href = `/controller.html?code=${displayId || ''}`;
+        }
+    </script>
+</body>
+</html>

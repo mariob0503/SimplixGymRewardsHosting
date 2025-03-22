@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Function to check if user is admin
+    function isAdmin(auth) {
+      return auth != null && 
+             (
+               (exists(/databases/$(database)/documents/users/$(auth.uid)) && 
+                get(/databases/$(database)/documents/users/$(auth.uid)).data != null &&
+                get(/databases/$(database)/documents/users/$(auth.uid)).data.isAdmin == true) ||
+               (auth.token.email != null && auth.token.email == "mario@simplix.solutions")
+             );
+    }
+
+    // Display records
+    match /displays/{displayId} {
+      allow read: if true;
+      allow write: if request.auth != null && 
+                   (
+                     request.auth.token.firebase.sign_in_provider == 'anonymous' ||
+                     isAdmin(request.auth)
+                   );
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if true;
+      
+      allow create: if request.auth != null && 
+                      request.auth.uid == userId &&
+                      request.resource.data.name is string &&
+                      request.resource.data.name.size() > 0 &&
+                      request.resource.data.name.size() <= 50;
+      
+      allow update: if request.auth != null && 
+                      (request.auth.uid == userId || isAdmin(request.auth)) &&
+                      (
+                        !("name" in request.resource.data) ||
+                        request.resource.data.name == resource.data.name ||
+                        (
+                          request.resource.data.name is string &&
+                          request.resource.data.name.size() > 0 &&
+                          request.resource.data.name.size() <= 50
+                        )
+                      );
+      
+      allow delete: if request.auth != null && 
+                      (request.auth.uid == userId || isAdmin(request.auth));
+    }
+    
+    // Gym locations
+    match /gyms/{gymId} {
+      allow read: if true;
+      allow create: if request.auth != null && 
+                      isAdmin(request.auth) &&
+                      request.resource.data.name is string &&
+                      request.resource.data.name.size() > 0;
+      allow update: if request.auth != null && 
+                      isAdmin(request.auth) &&
+                      request.resource.data.name is string &&
+                      request.resource.data.name.size() > 0;
+      allow delete: if request.auth != null && 
+                      isAdmin(request.auth);
+    }
+    
+    // Game results
+    match /gameResults/{resultId} {
+      allow read: if true;
+      allow create: if request.auth != null &&
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.gymId is string &&
+                      request.resource.data.gymId.size() > 0 &&
+                      request.resource.data.gameId is string &&
+                      request.resource.data.gameId.size() > 0 &&
+                      request.resource.data.score is number &&
+                      request.resource.data.score >= 0;
+      allow update, delete: if request.auth != null && isAdmin(request.auth);
+    }
+    
+    // Default deny rule for all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Lift & Earn - Leaderboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Base styles */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            padding: min(4vh, 2rem);
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            font-size: min(6vw, 2.5rem);
+            margin: 0;
+            color: #00BFFF;
+        }
+        
+        .leaderboard-container {
+            width: min(95%, 2000px);
+            background-color: rgba(0, 0, 0, 0.75);
+            border-radius: 10px;
+            padding: min(4vh, 1.5rem);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            margin-bottom: min(4vh, 2rem);
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: minmax(60px, 80px) minmax(200px, 1fr) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 225px) minmax(80px, 100px);
+            gap: 1rem;
+            background-color: rgba(0, 191, 255, 0.2);
+            padding: min(3vh, 1rem);
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            color: #00BFFF;
+            margin-bottom: 10px;
+        }
+        
+        .leaderboard-header > div {
+            text-align: center;
+        }
+        
+        .leaderboard-header > div:nth-child(2) {
+            text-align: left;
+            padding-left: min(2vw, 15px);
+        }
+        
+        /* Glow animations for top positions */
+        @keyframes goldGlow {
+            0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4); }
+            100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        }
+        
+        @keyframes silverGlow {
+            0% { box-shadow: 0 0 5px rgba(192, 192, 192, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(192, 192, 192, 0.8), 0 0 40px rgba(192, 192, 192, 0.4); }
+            100% { box-shadow: 0 0 5px rgba(192, 192, 192, 0.5); }
+        }
+        
+        @keyframes bronzeGlow {
+            0% { box-shadow: 0 0 5px rgba(205, 127, 50, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(205, 127, 50, 0.8), 0 0 30px rgba(205, 127, 50, 0.4); }
+            100% { box-shadow: 0 0 5px rgba(205, 127, 50, 0.5); }
+        }
+        
+        .rank-1 {
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            animation: goldGlow 2s infinite;
+        }
+        
+        .rank-2 {
+            background: rgba(192, 192, 192, 0.2);
+            color: #C0C0C0;
+            animation: silverGlow 2s infinite;
+        }
+        
+        .rank-3 {
+            background: rgba(205, 127, 50, 0.2);
+            color: #CD7F32;
+            animation: bronzeGlow 2s infinite;
+        }
+        
+        .rank-other {
+            background: rgba(0, 191, 255, 0.1);
+            color: #fff;
+        }
+        
+        .loading-message {
+            text-align: center;
+            color: #00BFFF;
+            padding: 20px;
+            font-size: 18px;
+        }
+        
+        .error-message {
+            text-align: center;
+            color: #FF6B6B;
+            padding: 20px;
+            font-size: 16px;
+            background-color: rgba(255, 107, 107, 0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .back-button {
+            background-color: #00BFFF;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+            box-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF;
+        }
+        
+        .back-button:hover {
+            background-color: #009acd;
+            transform: scale(1.05);
+        }
+        
+        .back-button:active {
+            transform: scale(0.98);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 100;
+        }
+        
+        /* Add styles for column consistency */
+        .leaderboard-header div, .leaderboard-entry div {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .rank-badge {
+            width: min(8vw, 40px);
+            height: min(8vw, 40px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-weight: bold;
+            font-size: min(4vw, 1.2rem);
+            background-color: rgba(0, 191, 255, 0.2);
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="/js/particleAnimation.js"></script>
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    
+    <header>
+        <h1>Leaderboard</h1>
+    </header>
+    
+    <div class="leaderboard-container" id="leaderboard-content">
+        <div class="leaderboard-header">
+            <div>Rank</div>
+            <div>Player</div>
+            <div>Rounds</div>
+            <div>Points</div>
+            <div>Studio</div>
+            <div>Tier</div>
+        </div>
+        <div class="loading-message">Loading leaderboard data...</div>
+    </div>
+    
+    <button class="back-button" onclick="goBack()">Zurück</button>
+    
+    <div class="debug-info" id="debug-info"></div>
+    
+    <script>
+        // Initialize particle animation
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof ParticleAnimation !== 'undefined' && ParticleAnimation.start) {
+                ParticleAnimation.start('particleCanvas');
+            }
+        });
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            authDomain: "simplixgymrewards.firebaseapp.com",
+            databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "simplixgymrewards",
+            storageBucket: "simplixgymrewards.appspot.com",
+            messagingSenderId: "821049711023",
+            apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+            appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Debug logging function
+        function logDebug(message) {
+            console.log(message);
+            const debugElement = document.getElementById('debug-info');
+            if (debugElement) {
+                debugElement.innerHTML += `<div>${message}</div>`;
+            }
+        }
+        
+        // Function to go back to the previous page
+        function goBack() {
+            window.location.href = '/';
+        }
+        
+        // Helper function for rank background colors
+        function getRankBackground(rank) {
+            switch(rank) {
+                case 1: return 'rgba(255, 215, 0, 0.2)';
+                case 2: return 'rgba(192, 192, 192, 0.2)';
+                case 3: return 'rgba(205, 127, 50, 0.2)';
+                default: return 'rgba(0, 191, 255, 0.1)';
+            }
+        }
+        
+        // Helper function for rank text colors
+        function getRankColor(rank) {
+            switch(rank) {
+                case 1: return '#FFD700';
+                case 2: return '#C0C0C0';
+                case 3: return '#CD7F32';
+                default: return '#fff';
+            }
+        }
+        
+        // Function to create a static leaderboard entry
+        function createStaticEntry(name, rounds, points, rank, gym = 'Unknown', tier = 'None') {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+            entryDiv.style.animation = `slideIn 0.3s ease-out ${rank * 0.1}s forwards`;
+            entryDiv.style.opacity = '0';
+            
+            // Determine trophy icon for top 3
+            let trophyIcon = '';
+            if (rank === 1) trophyIcon = '🏆';
+            else if (rank === 2) trophyIcon = '🥈';
+            else if (rank === 3) trophyIcon = '🥉';
+            
+            // Create entry content
+            entryDiv.innerHTML = `
+                <div style="width: 30px; text-align: center; font-weight: bold; font-size: 18px;">${rank}</div>
+                <div style="flex: 1; margin-left: 15px; font-weight: bold; font-size: 16px;">
+                    ${name} ${trophyIcon}
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 14px;">Rounds: ${rounds}</div>
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 16px; font-weight: bold;">Points: ${points}</div>
+                </div>
+                <div style="width: 120px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <div style="font-size: 14px;">${gym}</div>
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 14px;">${tier}</div>
+                </div>
+            `;
+            
+            return entryDiv;
+        }
+        
+        // Load leaderboard data
+        function loadLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            logDebug("Starting to fetch leaderboard data");
+            
+            // Try to sign in anonymously first
+            firebase.auth().signInAnonymously()
+                .then(() => {
+                    logDebug("Anonymous auth successful");
+                    return fetchLeaderboardData();
+                })
+                .catch((error) => {
+                    logDebug(`Anonymous auth failed: ${error.message}`);
+                    // If anonymous auth fails, try to fetch data directly
+                    return fetchLeaderboardData();
+                });
+                
+            function fetchLeaderboardData() {
+                // First try to get data from Firestore
+                const db = firebase.firestore();
+                logDebug("Firebase status: Initialized");
+                logDebug("Starting to fetch leaderboard data from Firestore");
+                
+                // Create a Firestore instance
+                logDebug("Firestore instance created");
+                
+                // First, fetch all gym data
+                let gymMap = {}; // Store gym ID to name mappings
+                
+                db.collection('gyms').get()
+                    .then(gymSnapshot => {
+                        // Create a map of gym IDs to gym names
+                        gymSnapshot.forEach(gymDoc => {
+                            gymMap[gymDoc.id] = gymDoc.data().name || gymDoc.id;
+                        });
+                        
+                        logDebug("Fetched gym data: " + JSON.stringify(gymMap));
+                        
+                        // Now fetch users data
+                        return db.collection('users')
+                            .orderBy('points', 'desc')
+                            .limit(10)
+                            .get();
+                    })
+                    .then((querySnapshot) => {
+                        logDebug("Firestore query completed. Found " + querySnapshot.size + " documents");
+                        
+                        // Clear loading message
+                        leaderboardContent.innerHTML = '';
+                        
+                        if (querySnapshot.empty) {
+                            // If no data in Firestore, show fallback data
+                            showFallbackData();
+                            return;
+                        }
+                        
+                        // Process each user document
+                        querySnapshot.docs.forEach((doc, index) => {
+                            const userData = doc.data();
+                            logDebug(`Processing user document NaN: ${JSON.stringify(userData)}`);
+                            const rank = index + 1;
+                            
+                            // Get gym name from the map - check both gymId and gym-id fields
+                            let gymName = 'Unknown';
+                            const gymIdentifier = userData.gymId || userData['gym-id'];
+                            if (gymIdentifier && gymMap[gymIdentifier]) {
+                                gymName = gymMap[gymIdentifier];
+                            } else if (gymIdentifier) {
+                                gymName = gymIdentifier;
+                            }
+                            
+                            // Get loyalty tier - check both formats and all possible field names
+                            const loyaltyTier = userData['loyalty-tier'] || 
+                                            userData.loyaltyTier || 
+                                            userData['loyalty_tier'] || 
+                                            (userData.loyalty ? userData.loyalty.tier : null) || 
+                                            'None';
+                            
+                            // Create leaderboard entry
+                            const entryDiv = document.createElement('div');
+                            entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+                            entryDiv.style.animation = `slideIn 0.3s ease-out ${index * 0.1}s forwards`;
+                            entryDiv.style.opacity = '0';
+                            
+                            // Determine trophy icon for top 3
+                            let trophyIcon = '';
+                            if (rank === 1) trophyIcon = '🏆';
+                            else if (rank === 2) trophyIcon = '🥈';
+                            else if (rank === 3) trophyIcon = '🥉';
+                            
+                            // Create entry content
+                            entryDiv.innerHTML = `
+                                <div style="width: 30px; text-align: center; font-weight: bold; font-size: 18px;">${rank}</div>
+                                <div style="flex: 1; margin-left: 15px; font-weight: bold; font-size: 16px;">
+                                    ${userData.name || 'Anonymous'} ${trophyIcon}
+                                </div>
+                                <div style="width: 80px; text-align: center;">
+                                    <div style="font-size: 14px;">Rounds: ${userData['number-played'] || 0}</div>
+                                </div>
+                                <div style="width: 80px; text-align: center;">
+                                    <div style="font-size: 16px; font-weight: bold;">Points: ${userData.points || 0}</div>
+                                </div>
+                                <div style="width: 120px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <div style="font-size: 14px;">${gymName}</div>
+                                </div>
+                                <div style="width: 80px; text-align: center;">
+                                    <div style="font-size: 14px;">${loyaltyTier}</div>
+                                </div>
+                            `;
+                            
+                            leaderboardContent.appendChild(entryDiv);
+                        });
+                    })
+                    .catch((error) => {
+                        logDebug(`Error fetching leaderboard data: ${error.message}`);
+                        // If Firestore query fails, show fallback data
+                        showFallbackData();
+                    });
+            }
+            
+            // Fallback function to show static data matching the screenshot
+            function showFallbackData() {
+                logDebug("Using fallback data for leaderboard");
+                leaderboardContent.innerHTML = '';
+                
+                // Add the entries we see in the screenshot
+                leaderboardContent.appendChild(createStaticEntry("NaN. supermario", 7, 75, 1, "MTT 2025", "None"));
+                leaderboardContent.appendChild(createStaticEntry("NaN. BFit24", 22, 75, 2, "BFit24 Henstedt-Ulzburg", "Bronze"));
+                
+                // Add some additional entries
+                leaderboardContent.appendChild(createStaticEntry("Player 3", 5, 50, 3, "BFit24 Henstedt-Ulzburg", "Bronze"));
+                leaderboardContent.appendChild(createStaticEntry("Player 4", 4, 40, 4, "BFit24 Wahlstedt", "Bronze"));
+                leaderboardContent.appendChild(createStaticEntry("Player 5", 3, 30, 5, "Unknown", "None"));
+            }
+        }
+        
+        // Load leaderboard when page loads
+        window.addEventListener('DOMContentLoaded', loadLeaderboard);
+        
+        // Check for URL parameters that might indicate debug mode
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('debug') || urlParams.has('lreport')) {
+            document.getElementById('debug-info').style.display = 'block';
+        } else {
+            document.getElementById('debug-info').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

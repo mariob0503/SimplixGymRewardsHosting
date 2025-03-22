@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Simplix Gym Rewards - PowerPoint Challenge</title>
+  <style>
+    /* Base styles */
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      height: 100%;
+      overflow: hidden;
+      /* iOS-specific height adjustment */
+      height: -webkit-fill-available;
+    }
+    html { height: -webkit-fill-available; }
+    header {
+      text-align: center;
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      box-shadow: 0 0 5px #FFF, 0 0 10px #FFF, 0 0 15px #FFF;
+      padding: 0.8rem 1rem;
+      margin: 0.5rem 0;
+    }
+    header h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    header h1 span { color: #00BFFF; }
+    header h3 { font-size: 1rem; margin: 0.3rem 0 0 0; }
+
+    /* Game container */
+    #game {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background-color: #111;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+      position: relative;
+      margin: 0;
+      max-width: 95%;
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Game info section */
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .game-info-item {
+      background-color: rgba(0,191,255,0.2);
+      padding: 6px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-align: center;
+      min-width: 70px;
+      font-size: 0.85rem;
+    }
+    /* Progress indicators */
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background-color: #333;
+      border-radius: 3px;
+      margin: 5px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #00BFFF;
+      width: 100%;
+      transition: width 0.1s linear;
+    }
+    /* Top image sequence */
+    #topImages {
+      display: flex;
+      justify-content: center;
+      flex-wrap: nowrap;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background-color: rgba(0,191,255,0.1);
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    #topImages img {
+      flex: 0 0 auto;
+      width: calc(33.33% - 8px);
+      max-width: 100px;
+      min-width: 60px;
+      height: auto;
+      aspect-ratio: 1/1;
+      margin: 4px;
+      border: 2px solid #333;
+      border-radius: 6px;
+      object-fit: contain;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    /* Bottom grid (3x3) */
+    #bottomImages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 8px;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .card-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1/1;
+    }
+    .card-btn {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      border: 2px solid #333;
+      border-radius: 6px;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      transition: all 0.2s ease-in-out;
+    }
+    .card-btn:hover {
+      transform: scale(1.05);
+      border-color: #00BFFF;
+      filter: brightness(1.2);
+      z-index: 10;
+      box-shadow: 0 0 15px rgba(0,191,255,0.7);
+    }
+    .card-btn.selected {
+      border-color: #00BFFF;
+      box-shadow: 0 0 15px #00BFFF;
+      filter: brightness(1.2);
+    }
+    .card-img { width: 90%; height: 90%; object-fit: contain; }
+    /* Memorization animation */
+    @keyframes memorizeFlash {
+      0% { opacity: 1; }
+      50% { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
+    .memorize-mode { animation: memorizeFlash 1s infinite; }
+    /* Leaderboard */
+    #leaderboard {
+      text-align: center;
+      padding: 15px;
+      background-color: #111;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+      max-width: 95%;
+      width: 100%;
+      margin: 1rem 0;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    #leaderboard h2 { color: #00BFFF; font-size: 2rem; margin-bottom: 1rem; }
+    #scoreList {
+      list-style: none;
+      padding: 0;
+      margin: 0 auto;
+      max-width: 90%;
+    }
+    #scoreList li {
+      font-size: 1rem;
+      margin: 10px 0;
+      color: #E0E0E0;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background-color: rgba(0,191,255,0.1);
+      border-radius: 8px;
+      transition: transform 0.2s ease;
+    }
+    #scoreList li:hover {
+      transform: scale(1.02);
+      background-color: rgba(0,191,255,0.2);
+    }
+    #scoreList li:first-child {
+      background-color: rgba(0,191,255,0.3);
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 0 10px rgba(0,191,255,0.5);
+    }
+    /* Buttons */
+    button {
+      background-color: #00BFFF;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF;
+      margin-top: 15px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover {
+      background-color: #009acd;
+      transform: scale(1.05);
+      box-shadow: 0 0 8px #00BFFF, 0 0 15px #00BFFF;
+    }
+    button:active { transform: scale(0.98); }
+    /* Social sharing buttons */
+    #socialShare {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      width: 100%;
+      gap: 15px;
+    }
+    .share-btn {
+      background-color: #00BFFF;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF;
+      width: 180px;
+      font-weight: bold;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    #shareWhatsapp { background-color: #25D366; }
+    #shareTwitter { background-color: #1DA1F2; }
+    .share-btn:hover { transform: scale(1.05); }
+    .share-btn:active { transform: scale(0.98); }
+    /* Special effects */
+    .glow-effect {
+      filter: brightness(130%);
+      box-shadow: 0 0 10px rgba(0,191,255,0.8);
+    }
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      10%,30%,50%,70%,90% { transform: translateX(-5px); }
+      20%,40%,60%,80% { transform: translateX(5px); }
+    }
+    /* Animation elements */
+    #rocket {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      transition: bottom 2s ease-out;
+      z-index: 100;
+    }
+    .firework {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: explode 1s ease-out forwards;
+      z-index: 99;
+    }
+    @keyframes explode {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(5); opacity: 0; }
+    }
+    /* Game prompt */
+    #gamePrompt {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0,0,0,0.9);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 0 20px rgba(0,191,255,0.5);
+      max-width: 80%;
+    }
+    #gamePrompt h3 { color: #00BFFF; margin-top: 0; }
+    /* Status text */
+    #statusText {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      text-align: center;
+      color: #00BFFF;
+      font-weight: bold;
+      font-size: 1.1em;
+      text-shadow: 0 0 5px #000;
+      z-index: 90;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #statusText.show { opacity: 1; }
+    /* Combo meter */
+    #comboMeter {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: rgba(0,0,0,0.7);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 16px;
+      display: none;
+    }
+    #comboMeter.active {
+      display: block;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    /* Responsive adaptations */
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.8rem; }
+      header h3 { font-size: 0.9rem; }
+      header { padding: 0.8rem; margin-top: 0.3rem; }
+      #game { padding: 8px; margin: 0.3rem 0; }
+      #leaderboard { padding: 10px; }
+      .game-info-item { padding: 5px 8px; font-size: 0.8rem; }
+      #scoreList { max-width: 100%; }
+      .share-btn { width: 150px; padding: 10px 15px; font-size: 0.9em; }
+    }
+    @supports (-webkit-touch-callout: none) {
+      body, html { height: -webkit-fill-available; }
+      #game { max-height: 75vh; }
+    }
+    @media (max-height: 600px) {
+      header { padding: 0.5rem; margin-top: 0.2rem; margin-bottom: 0.2rem; }
+      header h1 { font-size: 1.5rem; }
+      header h3 { font-size: 0.8rem; margin-top: 0.2rem; }
+      #game { margin: 0.2rem 0; padding: 8px; max-height: 80vh; }
+      #topImages { padding: 4px; }
+      #topImages img { margin: 3px; border-width: 2px; }
+      #bottomImages { grid-gap: 6px; }
+    }
+    @media (min-aspect-ratio: 2/3) and (max-width: 500px) {
+      #game { max-height: 85vh; }
+      .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+    }
+    /* Debug panel */
+    #debug-panel {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: rgba(0,0,0,0.7);
+      color: lime;
+      font-family: monospace;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 10px;
+      max-width: 200px;
+      max-height: 100px;
+      overflow: auto;
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PowerPoint <span>Challenge</span></h1>
+    <h3>Simplix Gym Rewards</h3>
+  </header>
+  
+  <div id="game">
+    <div class="game-info">
+      <div id="round" class="game-info-item">Round: 1</div>
+      <div id="timer" class="game-info-item">Time: 60.0s</div>
+      <div id="score" class="game-info-item">Score: 0</div>
+    </div>
+    <div class="progress-container">
+      <div id="timeProgress" class="progress-bar"></div>
+    </div>
+    
+    <div class="game-container">
+      <div id="topImages">
+        <img id="top1" src="assets/images/image5.png">
+        <img id="top2" src="assets/images/image5.png">
+        <img id="top3" src="assets/images/image5.png">
+      </div>
+      <div id="bottomImages"></div>
+    </div>
+    
+    <div id="comboMeter">Combo x2!</div>
+    <div id="statusText"></div>
+    
+    <div id="gamePrompt">
+      <h3>Get Ready!</h3>
+      <p>Memorize the sequence and then match it exactly!</p>
+      <div id="countdownTimer">3</div>
+    </div>
+  </div>
+  
+  <div id="leaderboard" style="display: none;">
+    <h2>Top Players</h2>
+    <ul id="scoreList"></ul>
+    <div id="socialShare">
+      <button class="share-btn" id="shareWhatsapp">Share on WhatsApp</button>
+      <button class="share-btn" id="shareTwitter">Share on Twitter</button>
+    </div>
+    <button id="playAgain">Play Again</button>
+  </div>
+  
+  <img id="rocket" src="assets/images/rocket.png" style="display: none;">
+  
+  <!-- Debug panel for development -->
+  <div id="debug-panel"></div>
+
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      authDomain: "simplixgymrewards.firebaseapp.com",
+      databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "simplixgymrewards",
+      storageBucket: "simplixgymrewards.appspot.com",
+      messagingSenderId: "821049711023"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
+    // Get display ID from URL
+    function getQueryParam(param) {
+      var params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+    const displayId = getQueryParam("display");
+    
+    // Global game variables
+    const images = [
+      'assets/images/image1.png',
+      'assets/images/image2.png',
+      'assets/images/image3.png',
+      'assets/images/image4.png',
+      'assets/images/image5.png',
+      'assets/images/image6.png',
+      'assets/images/image7.png',
+      'assets/images/image8.png',
+      'assets/images/image9.png'
+    ];
+    let topSequence = [];
+    let bottomImages = []; // Shuffled indices 0-8
+    let selection = [];
+    let roundActive = false;
+    let round = 1;
+    let score = 0;
+    let timeLeft = 60;
+    let timerId;
+    let totalRounds = 0;
+    let comboCount = 0;
+    let difficulty = 1;
+    let memorizationTime = 5000;
+    let isMemorizingPhase = false;
+    let achievements = [];
+    let gameStartTime;
+    let clickHandlersActive = false; // Whether card taps are processed
+    
+    // DOM element references
+    let gameDiv, topImagesElements, bottomImagesDiv, timerDiv, roundDiv, scoreDiv, timeProgressBar,
+        leaderboardDiv, scoreList, playAgainButton, rocket, gamePrompt, countdownTimer, comboMeter,
+        statusText, debugPanel;
+    
+    function getElement(id) {
+      const element = document.getElementById(id);
+      if (!element) { console.warn(`Element with ID '${id}' not found`); }
+      return element;
+    }
+    
+    function initializeDOMReferences() {
+      gameDiv = getElement('game');
+      topImagesElements = [ getElement('top1'), getElement('top2'), getElement('top3') ];
+      bottomImagesDiv = getElement('bottomImages');
+      timerDiv = getElement('timer');
+      roundDiv = getElement('round');
+      scoreDiv = getElement('score');
+      timeProgressBar = getElement('timeProgress');
+      leaderboardDiv = getElement('leaderboard');
+      scoreList = getElement('scoreList');
+      playAgainButton = getElement('playAgain');
+      rocket = getElement('rocket');
+      gamePrompt = getElement('gamePrompt');
+      countdownTimer = getElement('countdownTimer');
+      comboMeter = getElement('comboMeter');
+      statusText = getElement('statusText');
+      debugPanel = getElement('debug-panel');
+      debug("DOM references initialized");
+    }
+    
+    // Debug logging (set to false for production)
+    const DEBUG_MODE = false;
+    function debug(message) {
+      if (!DEBUG_MODE) return;
+      console.log(`[DEBUG] ${message}`);
+      if (debugPanel) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `${timestamp}: ${message}`;
+        debugPanel.appendChild(logEntry);
+        debugPanel.scrollTop = debugPanel.scrollHeight;
+        debugPanel.style.display = 'block';
+      }
+    }
+    
+    // Setup event listeners for game controls
+    function setupGameEventListeners() {
+      try {
+        if (playAgainButton) {
+          playAgainButton.onclick = startGame;
+        }
+        const shareWhatsappBtn = getElement('shareWhatsapp');
+        if (shareWhatsappBtn) { shareWhatsappBtn.onclick = () => shareScore('whatsapp'); }
+        const shareTwitterBtn = getElement('shareTwitter');
+        if (shareTwitterBtn) { shareTwitterBtn.onclick = () => shareScore('twitter'); }
+        debug("Event listeners set up");
+      } catch (err) {
+        console.error("Error setting up event listeners:", err);
+      }
+    }
+    
+    // Setup grid event delegation for card taps
+    function setupGridEventListener() {
+      if (!bottomImagesDiv) return;
+      bottomImagesDiv.addEventListener('pointerdown', (event) => {
+        if (!clickHandlersActive || isMemorizingPhase) return;
+        const btn = event.target.closest('.card-btn');
+        if (!btn) return;
+        // Use the unary plus operator for fast conversion
+        const idx = +btn.dataset.index;
+        toggleSelection(idx, btn);
+      }, { passive: true });
+      debug("Grid pointerdown listener attached");
+    }
+    
+    // iOS height fix
+    function fixIOSHeight() {
+      if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+        document.body.style.height = window.innerHeight + 'px';
+      }
+    }
+    
+    // Show status message
+    function showStatus(message, duration = 1500) {
+      if (statusText) {
+        statusText.textContent = message;
+        statusText.classList.add('show');
+        setTimeout(() => { statusText.classList.remove('show'); }, duration);
+      }
+    }
+    
+    // Preload images before starting the game
+    function preloadImages() {
+      debug("Preloading images");
+      const preloadArray = [...images];
+      if (topImagesElements) {
+        topImagesElements.forEach((img) => { if (img) img.src = 'assets/images/image5.png'; });
+      }
+      let loaded = 0, failed = 0;
+      preloadArray.forEach((src, index) => {
+        const img = new Image();
+        img.onload = () => {
+          debug(`Loaded image ${index+1}: ${src}`);
+          loaded++;
+          if (loaded + failed === preloadArray.length) { startGame(); }
+        };
+        img.onerror = () => {
+          console.error(`Failed to load image ${index+1}: ${src}`);
+          failed++;
+          if (loaded + failed === preloadArray.length) { startGame(); }
+        };
+        img.src = src;
+      });
+      setTimeout(() => {
+        if (loaded + failed < preloadArray.length) {
+          console.warn("Some images didn't load in time; starting game anyway");
+          startGame();
+        }
+      }, 3000);
+    }
+    
+    // Start a new game
+    function startGame() {
+      debug("Starting new game");
+      if (!gameDiv) { initializeDOMReferences(); }
+      gameStartTime = Date.now();
+      round = 1; score = 0; timeLeft = 60; totalRounds = 0; comboCount = 0; difficulty = 1;
+      selection = [];
+      achievements = [];
+      clickHandlersActive = false; roundActive = false; isMemorizingPhase = false;
+      if (gameDiv) gameDiv.style.display = 'flex';
+      if (leaderboardDiv) leaderboardDiv.style.display = 'none';
+      if (rocket) rocket.style.display = 'none';
+      if (topImagesElements) {
+        topImagesElements.forEach(img => { if (img) img.src = 'assets/images/image5.png'; });
+      }
+      showGamePrompt("Get Ready!", "Memorize the sequence and then match it exactly!", 3);
+    }
+    
+    // Set up game after prompt countdown ends
+    function setupGameFlow() {
+      debug("Setting up game flow");
+      if (topImagesElements) {
+        topImagesElements.forEach(img => { if (img) img.src = 'assets/images/image5.png'; });
+      }
+      setupRound();
+      startGameTimer();
+      if (displayId) {
+        const gameState = { status: 'game_started', round, score, timeLeft: Math.floor(timeLeft), timestamp: Date.now() };
+        database.ref(`displays/${displayId}/game_state`).set(gameState);
+      }
+    }
+    
+    // Show game prompt with optional countdown
+    function showGamePrompt(title, message, countdown = 0) {
+      debug(`Showing prompt: ${title}`);
+      if (!gamePrompt) return;
+      const promptTitle = gamePrompt.querySelector('h3');
+      const promptMessage = gamePrompt.querySelector('p');
+      if (promptTitle) promptTitle.textContent = title;
+      if (promptMessage) promptMessage.textContent = message;
+      if (countdown > 0 && countdownTimer) {
+        countdownTimer.textContent = countdown;
+        countdownTimer.style.display = 'block';
+        let count = countdown;
+        const countInterval = setInterval(() => {
+          count--;
+          countdownTimer.textContent = count;
+          if (count <= 0) {
+            clearInterval(countInterval);
+            gamePrompt.style.display = 'none';
+            setupGameFlow();
+          }
+        }, 1000);
+      } else if (countdownTimer) { countdownTimer.style.display = 'none'; }
+      gamePrompt.style.display = 'flex';
+    }
+    
+    // Start game timer
+    function startGameTimer() {
+      debug("Starting game timer");
+      if (!timeProgressBar || !timerDiv) return;
+      clearInterval(timerId);
+      timeProgressBar.style.width = '100%';
+      timerId = setInterval(() => {
+        timeLeft -= 0.1;
+        const percentage = (timeLeft / 60) * 100;
+        timeProgressBar.style.width = `${Math.max(percentage, 0)}%`;
+        timeProgressBar.style.backgroundColor = (percentage < 30) ? '#FF4500' :
+                                                (percentage < 60) ? '#FFA500' : '#00BFFF';
+        timerDiv.textContent = `Time: ${Math.max(timeLeft, 0).toFixed(1)}s`;
+        if (Math.round(timeLeft * 10) % 10 === 0 && displayId) {
+          const gameState = { status: 'in_progress', round, score, timeLeft: Math.floor(timeLeft), timestamp: Date.now() };
+          database.ref(`displays/${displayId}/game_state`).set(gameState);
+        }
+        if (timeLeft <= 0) { clearInterval(timerId); endGameSequence(); }
+      }, 100);
+    }
+    
+    // Set up a round: generate sequence, show memorization phase, rebuild grid
+    function setupRound() {
+      debug(`Setting up round ${round}`);
+      if (!bottomImagesDiv || !roundDiv) { debug("Critical elements missing"); return; }
+      if (roundActive) { debug("Round already active"); return; }
+      roundActive = true;
+      clickHandlersActive = false;
+      isMemorizingPhase = true;
+      selection = [];
+      roundDiv.textContent = `Round: ${round}`;
+      // Clear any old selection state from grid
+      document.querySelectorAll('.card-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.classList.remove('glow-effect');
+      });
+      // Adjust difficulty based on round
+      if (round > 10) { difficulty = 3; }
+      else if (round > 5) { difficulty = 2; }
+      generateSequence();
+      if (topImagesElements) {
+        topImagesElements.forEach((img, i) => {
+          if (img && topSequence[i] !== undefined) {
+            img.src = images[topSequence[i]];
+            img.classList.add('glow-effect');
+          }
+        });
+      }
+      if (gameDiv) gameDiv.classList.add('memorize-mode');
+      bottomImages = [...Array(9).keys()];
+      shuffle(bottomImages);
+      rebuildCardGrid();
+      const actualMemTime = memorizationTime - (difficulty * 1000);
+      debug(`Memorization phase: ${actualMemTime}ms`);
+      // Use requestAnimationFrame to ensure UI is updated before enabling clicks
+      setTimeout(() => {
+        if (!roundActive) { debug("Round aborted"); return; }
+        requestAnimationFrame(() => { endMemorizationPhase(); });
+      }, actualMemTime);
+    }
+    
+    // End memorization phase: enable click handling immediately
+    function endMemorizationPhase() {
+      debug("Ending memorization phase");
+      isMemorizingPhase = false;
+      if (gameDiv) gameDiv.classList.remove('memorize-mode');
+      clickHandlersActive = true;
+      showStatus("Select the matching pattern!", 1000);
+      if (difficulty >= 2 && topImagesElements) {
+        topImagesElements.forEach((img) => {
+          if (img) {
+            img.classList.remove('glow-effect');
+            if (difficulty === 3) { img.src = images[8]; }
+          }
+        });
+      }
+    }
+    
+    // Rebuild the card grid (event delegation remains on parent)
+    function rebuildCardGrid() {
+      debug("Rebuilding card grid");
+      if (!bottomImagesDiv) { debug("Grid container missing"); return; }
+      bottomImagesDiv.innerHTML = '';
+      bottomImages.forEach(idx => {
+        const container = document.createElement('div');
+        container.className = 'card-container';
+        const btn = document.createElement('div');
+        btn.className = 'card-btn';
+        btn.dataset.index = idx;
+        const img = document.createElement('img');
+        img.src = images[idx];
+        img.className = 'card-img';
+        btn.appendChild(img);
+        container.appendChild(btn);
+        bottomImagesDiv.appendChild(container);
+      });
+      debug("Grid rebuilt");
+    }
+    
+    // Toggle card selection on tap
+    function toggleSelection(idx, btnElement) {
+      debug(`Toggle selection for idx=${idx}`);
+      if (!clickHandlersActive || isMemorizingPhase) { debug("Click ignored due to state"); return; }
+      idx = +idx;
+      const selectionIndex = selection.indexOf(idx);
+      if (selectionIndex !== -1) {
+        selection.splice(selectionIndex, 1);
+        btnElement.classList.remove('selected');
+        btnElement.classList.remove('glow-effect');
+        playDeselectSound();
+        debug(`Deselected ${idx}, selection now: [${selection}]`);
+      } else {
+        if (selection.length < 3) {
+          selection.push(idx);
+          btnElement.classList.add('selected');
+          btnElement.classList.add('glow-effect');
+          playSelectSound();
+          debug(`Selected ${idx}, selection now: [${selection}]`);
+          if (selection.length === 3) {
+            clickHandlersActive = false;
+            setTimeout(checkSequence, 0);
+          }
+        } else {
+          showStatus("Maximum 3 selections. Deselect one first.", 1500);
+        }
+      }
+    }
+    
+    // Check if selected sequence matches target
+    function checkSequence() {
+      debug(`Checking sequence: [${selection}] vs [${topSequence}]`);
+      const isCorrect = compareArrays(selection, topSequence);
+      if (isCorrect) { handleCorrectMatch(); }
+      else { handleIncorrectMatch(); }
+    }
+    
+    function compareArrays(arr1, arr2) {
+      if (arr1.length !== arr2.length) return false;
+      for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+      }
+      return true;
+    }
+    
+    // Handle correct sequence: update score and automatically start next round
+    function handleCorrectMatch() {
+      debug("Sequence correct!");
+      roundActive = false;
+      showStatus("Correct! Great job!", 1000);
+      comboCount++;
+      let roundScore = (round <= 5) ? 5 : 10;
+      if (comboCount >= 3) { roundScore *= 2; showCombo(comboCount); }
+      if (timeLeft > 45) { roundScore += 5; showStatus("Speed Bonus! +5 points", 1000); }
+      score += roundScore;
+      if (scoreDiv) scoreDiv.textContent = `Score: ${score}`;
+      flashSuccessAnimation();
+      totalRounds++;
+      round++;
+      if (round === 5) {
+        showStatus("Round 5 reached! +10 seconds", 1500);
+        timeLeft = Math.min(timeLeft + 10, 60);
+      }
+      if (round === 10) { showStatus("Round 10! Difficulty increased!", 1500); }
+      // Automatically start next round after a short delay
+      setTimeout(() => { setupRound(); }, 1000);
+      debug("Next round starting automatically");
+    }
+    
+    // Handle incorrect sequence: retry or end game
+    function handleIncorrectMatch() {
+      debug("Sequence incorrect");
+      comboCount = 0;
+      if (gameDiv) gameDiv.classList.add('shake');
+      setTimeout(() => { if (gameDiv) gameDiv.classList.remove('shake'); }, 500);
+      if (topImagesElements) {
+        topImagesElements.forEach((img, i) => {
+          if (img && topSequence[i] !== undefined) {
+            img.src = images[topSequence[i]];
+            img.classList.add('glow-effect');
+          }
+        });
+      }
+      clickHandlersActive = false;
+      if (round <= 3) {
+        showStatus("Try again!", 1500);
+        selection = [];
+        setTimeout(() => {
+          document.querySelectorAll('.card-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.classList.remove('glow-effect');
+          });
+          roundActive = false;
+          setTimeout(() => { setupRound(); }, 300);
+        }, 1000);
+      } else {
+        showStatus("Game Over!", 1500);
+        setTimeout(() => { endGameSequence(); }, 1500);
+      }
+    }
+    
+    function showCombo(count) {
+      if (!comboMeter) return;
+      comboMeter.textContent = `Combo x${count}!`;
+      comboMeter.style.display = 'block';
+      comboMeter.classList.add('active');
+      setTimeout(() => { comboMeter.classList.remove('active'); comboMeter.style.display = 'none'; }, 2000);
+    }
+    
+    function flashSuccessAnimation() {
+      if (topImagesElements) {
+        topImagesElements.forEach(img => {
+          if (img) {
+            img.classList.add('glow-effect');
+            setTimeout(() => { img.classList.remove('glow-effect'); }, 500);
+          }
+        });
+      }
+      playSuccessSound();
+    }
+    
+    function endGameSequence() {
+      debug("Ending game");
+      clearInterval(timerId);
+      roundActive = false;
+      clickHandlersActive = false;
+      const timeBonus = Math.max(0, Math.floor(timeLeft));
+      const finalScore = score + timeBonus;
+      if (topImagesElements) {
+        topImagesElements.forEach(img => {
+          if (img) { img.src = images[4]; img.classList.add('glow-effect'); }
+        });
+      }
+      showGamePrompt("Game Over!", `Great job! You completed ${totalRounds} rounds.\nFinal Score: ${finalScore}\nTime Bonus: +${timeBonus}`, 0);
+      if (displayId) {
+        const gameState = { status: 'game_over', rounds: totalRounds, score: finalScore, timeBonus, timestamp: Date.now() };
+        database.ref(`displays/${displayId}/game_state`).set(gameState);
+      }
+      setTimeout(() => {
+        if (gameDiv) gameDiv.style.display = 'none';
+        if (gamePrompt) gamePrompt.style.display = 'none';
+        if (leaderboardDiv) leaderboardDiv.style.display = 'block';
+        showLeaderboard(finalScore);
+      }, 3000);
+    }
+    
+    function showLeaderboard(finalScore) {
+      if (!scoreList || !rocket) return;
+      let playerName = localStorage.getItem('playerName');
+      if (!playerName) {
+        playerName = prompt("Enter your name for the leaderboard:", "Player") || "Anonymous";
+        localStorage.setItem('playerName', playerName);
+      }
+      if (displayId) {
+        const leaderboardRef = database.ref('leaderboards/game2');
+        const newScoreRef = leaderboardRef.push();
+        newScoreRef.set({ name: playerName, score: finalScore, rounds: totalRounds, timestamp: Date.now(), displayId });
+      }
+      let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+      gameResults.push({ name: playerName, score: finalScore, rounds: totalRounds, date: new Date().toLocaleDateString() });
+      gameResults.sort((a, b) => b.score - a.score);
+      gameResults = gameResults.slice(0, 10);
+      localStorage.setItem('gameResults', JSON.stringify(gameResults));
+      scoreList.innerHTML = '';
+      gameResults.forEach((result, i) => {
+        const li = document.createElement('li');
+        if (result.name === playerName && result.score === finalScore) {
+          li.style.backgroundColor = 'rgba(0,191,255,0.3)';
+          li.style.fontWeight = 'bold';
+        }
+        const rankSpan = document.createElement('span');
+        rankSpan.textContent = `${i + 1}.`;
+        const playerSpan = document.createElement('span');
+        playerSpan.textContent = result.name;
+        const scoreSpan = document.createElement('span');
+        scoreSpan.className = 'score';
+        scoreSpan.textContent = `${result.score} pts (${result.rounds} rounds)`;
+        li.appendChild(rankSpan);
+        li.appendChild(playerSpan);
+        li.appendChild(scoreSpan);
+        scoreList.appendChild(li);
+      });
+      rocket.style.display = 'block';
+      setTimeout(() => {
+        rocket.style.bottom = '100%';
+        createFireworks();
+      }, 500);
+    }
+    
+    function createFireworks() {
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => {
+          const firework = document.createElement('div');
+          firework.className = 'firework';
+          firework.style.left = `${Math.random() * 100}%`;
+          firework.style.top = `${Math.random() * 50}%`;
+          const colors = ['#00BFFF','#FF4500','#FFD700','#FF1493','#7CFC00'];
+          firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          const size = 5 + Math.random() * 10;
+          firework.style.width = `${size}px`;
+          firework.style.height = `${size}px`;
+          document.body.appendChild(firework);
+          setTimeout(() => firework.remove(), 1000);
+        }, i * 200);
+      }
+    }
+    
+    function shareScore(platform) {
+      const playerName = localStorage.getItem('playerName') || 'Anonymous';
+      const playerScore = score;
+      const shareText = `I scored ${playerScore} points playing PowerPoint Challenge at my gym! Can you beat my score? 💪 #SimplixGymRewards #FitnessChallenge`;
+      if (platform === 'whatsapp') {
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+      } else if (platform === 'twitter') {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank');
+      }
+    }
+    
+    // Global audio context reused for sounds
+    let globalAudioContext = null;
+    function getAudioContext() {
+      if (!globalAudioContext) { globalAudioContext = new (window.AudioContext || window.webkitAudioContext)(); }
+      return globalAudioContext;
+    }
+    
+    function playSelectSound() {
+      try {
+        const audioContext = getAudioContext();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } catch (e) { console.log('Audio not supported'); }
+    }
+    
+    function playDeselectSound() {
+      try {
+        const audioContext = getAudioContext();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.08);
+      } catch (e) { console.log('Audio not supported'); }
+    }
+    
+    function playSuccessSound() {
+      try {
+        const audioContext = getAudioContext();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime + 0.1);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } catch (e) { console.log('Audio not supported'); }
+    }
+    
+    // Listen for Firebase controller input
+    if (displayId) {
+      const gameActionsRef = database.ref(`displays/${displayId}/game2_actions`);
+      gameActionsRef.on('value', (snapshot) => {
+        const action = snapshot.val();
+        if (!action) return;
+        if (action.cardId !== undefined && !isMemorizingPhase && clickHandlersActive) {
+          const cardIndex = (+action.cardId) - 1;
+          if (cardIndex >= 0 && cardIndex < 9) {
+            const btnElements = document.querySelectorAll('.card-btn');
+            let targetBtn = null;
+            for (let i = 0; i < btnElements.length; i++) {
+              if ((+btnElements[i].dataset.index) === cardIndex) { targetBtn = btnElements[i]; break; }
+            }
+            if (targetBtn) { toggleSelection(cardIndex, targetBtn); }
+          }
+        }
+      });
+      
+      const gameRestartRef = database.ref(`displays/${displayId}/game_restart`);
+      gameRestartRef.on('value', (snapshot) => {
+        const restartData = snapshot.val();
+        if (restartData && restartData.timestamp) {
+          if (Date.now() - restartData.timestamp < 5000) { startGame(); }
+        }
+      });
+    }
+    
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error("Game error:", message, "at", source, lineno, colno);
+      debug(`ERROR: ${message} at line ${lineno}`);
+      showStatus("Error occurred. Trying to recover...", 2000);
+      clickHandlersActive = false;
+      setTimeout(() => {
+        if (!clickHandlersActive && !isMemorizingPhase && !roundActive) {
+          debug("Recovering: restarting game");
+          startGame();
+        } else if (roundActive) {
+          debug("Recovering: resetting current round");
+          roundActive = false;
+          clickHandlersActive = false;
+          isMemorizingPhase = false;
+          setTimeout(() => { setupRound(); }, 500);
+        }
+      }, 2000);
+      return true;
+    };
+    
+    // Initialize once on window load
+    window.onload = function() {
+      initializeDOMReferences();
+      fixIOSHeight();
+      setupGameEventListeners();
+      setupGridEventListener();
+      preloadImages();
+      debug("Game initialized from window.onload");
+    };
+    
+    // Utility function to shuffle an array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    
+    // Generate target sequence (3 unique indices)
+    function generateSequence() {
+      topSequence = [];
+      while (topSequence.length < 3) {
+        const idx = Math.floor(Math.random() * 9);
+        if (!topSequence.includes(idx)) { topSequence.push(idx); }
+      }
+      debug(`Generated sequence: [${topSequence}]`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet the Top Challenge - Simplix Gym Rewards</title>
+    <style>
+        /* Custom Properties */
+        @property --angle-1 {
+            syntax: "<angle>";
+            inherits: false;
+            initial-value: -75deg;
+        }
+
+        @property --angle-2 {
+            syntax: "<angle>";
+            inherits: false;
+            initial-value: -45deg;
+        }
+
+        :root {
+            --global--size: clamp(1.5rem, 3vw, 2.5rem);
+            --anim--hover-time: 400ms;
+            --anim--hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
+            --primary-color: #00BFFF;
+            --primary-glow: 0 0 10px #00BFFF, 0 0 20px #00BFFF;
+            --secondary-glow: 0 0 5px #FFFFFF, 0 0 10px #FFFFFF, 0 0 15px #FFFFFF;
+        }
+
+        /* Base Styles */
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+            padding: 2vh 0;
+            box-sizing: border-box;
+        }
+
+        /* Background Grid */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            opacity: 0.3;
+            animation: gridPulse 8s infinite ease-in-out;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+            box-shadow: var(--secondary-glow);
+            padding: 1rem;
+            margin-top: 0;
+            position: relative;
+            animation: headerPulse 3s ease-in-out infinite;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            height: 15vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes headerPulse {
+            0%, 100% { box-shadow: var(--secondary-glow); }
+            50% { box-shadow: var(--primary-glow); }
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin: 0;
+            animation: textGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+                             0 0 40px var(--primary-color),
+                             0 0 60px var(--primary-color),
+                             0 0 80px var(--primary-color);
+            }
+            50% { 
+                text-shadow: 0 0 40px var(--primary-color),
+                             0 0 80px var(--primary-color),
+                             0 0 100px var(--primary-color),
+                             0 0 120px var(--primary-color);
+            }
+        }
+
+        header h1 span {
+            color: var(--primary-color);
+        }
+
+        header h3 {
+            font-size: 1.2rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        /* Main Content */
+        .challenge-container {
+            height: 75vh;
+            max-height: 75vh;
+            width: 90%;
+            max-width: 1200px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @keyframes containerPulse {
+            0%, 100% { box-shadow: none; }
+            50% { box-shadow: none; }
+        }
+
+        .challenge-text {
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 3vh;
+        }
+
+        .challenge-text h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5vh;
+            text-align: center;
+        }
+
+        .challenge-text p {
+            font-size: 1.3rem;
+            margin: 0 auto 1vh auto;
+            text-align: center;
+        }
+
+        /* Button Styles */
+        .button-wrap {
+            margin-bottom: 3vh;
+        }
+
+        .button-wrap {
+            position: relative;
+            z-index: 2;
+            border-radius: 999vw;
+            background: transparent;
+            pointer-events: none;
+            transition: all var(--anim--hover-time) var(--anim--hover-ease);
+            margin: 0;
+            height: 10vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .button-shadow {
+            --shadow-cuttoff-fix: 2em;
+            position: absolute;
+            width: calc(100% + var(--shadow-cuttoff-fix));
+            height: calc(100% + var(--shadow-cuttoff-fix));
+            top: calc(0% - var(--shadow-cuttoff-fix) / 2);
+            left: calc(0% - var(--shadow-cuttoff-fix) / 2);
+            filter: blur(clamp(2px, 0.125em, 12px));
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        .button-shadow::after {
+            content: "";
+            position: absolute;
+            z-index: 0;
+            inset: 0;
+            border-radius: 999vw;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+            width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+            height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+            top: calc(var(--shadow-cuttoff-fix) - 0.5em);
+            left: calc(var(--shadow-cuttoff-fix) - 0.875em);
+            padding: 0.125em;
+            box-sizing: border-box;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            transition: all var(--anim--hover-time) var(--anim--hover-ease);
+            overflow: visible;
+            opacity: 1;
+        }
+
+        button {
+            --border-width: clamp(1px, 0.0625em, 4px);
+            all: unset;
+            cursor: pointer;
+            position: relative;
+            pointer-events: auto;
+            z-index: 3;
+            background: linear-gradient(
+                -75deg,
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0.2),
+                rgba(255, 255, 255, 0.05)
+            );
+            border-radius: 999vw;
+            box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+                inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+                0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+                0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+                0 0 0 0 rgba(255, 255, 255, 1);
+            backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+            transition: all var(--anim--hover-time) var(--anim--hover-ease),
+                        transform 0.3s ease;
+            overflow: hidden;
+            padding: 0.2rem;
+            transform-origin: center;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0, 191, 255, 0.4),
+                transparent
+            );
+            transition: left 1s ease;
+            z-index: 2;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.6),
+                        0 0 30px rgba(0, 191, 255, 0.4),
+                        inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button span {
+            position: relative;
+            display: block;
+            user-select: none;
+            font-family: "Inter", Arial, sans-serif;
+            letter-spacing: -0.05em;
+            font-weight: 500;
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+            transition: all var(--anim--hover-time) var(--anim--hover-ease);
+            padding-inline: 2em;
+            padding-block: 0.7em;
+            z-index: 3;
+        }
+
+        button:hover span {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                         0 0 20px var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        button span::after {
+            content: "";
+            display: block;
+            position: absolute;
+            z-index: 1;
+            width: calc(100% - var(--border-width));
+            height: calc(100% - var(--border-width));
+            top: calc(0% + var(--border-width) / 2);
+            left: calc(0% + var(--border-width) / 2);
+            box-sizing: border-box;
+            border-radius: 999vw;
+            overflow: clip;
+            background: linear-gradient(
+                var(--angle-2),
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.5) 40% 50%,
+                rgba(255, 255, 255, 0) 55%
+            );
+            z-index: 3;
+            mix-blend-mode: screen;
+            pointer-events: none;
+            background-size: 200% 200%;
+            background-position: 0% 50%;
+            background-repeat: no-repeat;
+            transition: background-position calc(var(--anim--hover-time) * 1.25)
+                var(--anim--hover-ease),
+                --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
+        }
+
+        button:hover span::after {
+            background-position: 25% 50%;
+        }
+
+        button:active span::after {
+            background-position: 50% 15%;
+            --angle-2: -15deg;
+        }
+
+        button::after {
+            content: "";
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            border-radius: 999vw;
+            width: calc(100% + var(--border-width));
+            height: calc(100% + var(--border-width));
+            top: calc(0% - var(--border-width) / 2);
+            left: calc(0% - var(--border-width) / 2);
+            padding: var(--border-width);
+            box-sizing: border-box;
+            background: conic-gradient(
+                from var(--angle-1) at 50% 50%,
+                rgba(0, 191, 255, 0.5),
+                rgba(0, 0, 0, 0) 5% 40%,
+                rgba(0, 191, 255, 0.5) 50%,
+                rgba(0, 0, 0, 0) 60% 95%,
+                rgba(0, 191, 255, 0.5)
+            ),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            transition: all var(--anim--hover-time) var(--anim--hover-ease),
+                --angle-1 500ms ease;
+            box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
+        }
+
+        button:hover::after {
+            --angle-1: -125deg;
+        }
+
+        button:active::after {
+            --angle-1: -75deg;
+        }
+
+        .button-wrap:has(button:hover) .button-shadow {
+            filter: blur(clamp(2px, 0.0625em, 6px));
+            transition: filter var(--anim--hover-time) var(--anim--hover-ease);
+        }
+
+        .button-wrap:has(button:hover) .button-shadow::after {
+            top: calc(var(--shadow-cuttoff-fix) - 0.875em);
+            opacity: 1;
+        }
+
+        .button-wrap:has(button:active) {
+            transform: rotate3d(1, 0, 0, 25deg);
+        }
+
+        .button-wrap:has(button:active) button {
+            box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+                inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+                0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+                0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+                0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
+                0 0.25em 0 0 rgba(255, 255, 255, 0.75),
+                inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .button-wrap:has(button:active) .button-shadow {
+            filter: blur(clamp(2px, 0.125em, 12px));
+        }
+
+        .button-wrap:has(button:active) .button-shadow::after {
+            top: calc(var(--shadow-cuttoff-fix) - 0.5em);
+            opacity: 0.75;
+        }
+
+        .button-wrap:has(button:active) span {
+            text-shadow: 0.025em 0.25em 0.05em rgba(0, 0, 0, 0.12);
+        }
+
+        /* Particles */
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            opacity: 0;
+            animation: particleFloat 15s linear infinite;
+            box-shadow: 0 0 10px 2px var(--primary-color);
+        }
+
+        /* Add star particles */
+        .star-particle {
+            position: fixed;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            z-index: -2;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8),
+                            0 0 12px 6px rgba(0, 191, 255, 0.4);
+            }
+        }
+
+        /* Enhanced particle float animation */
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0.8);
+                opacity: 0;
+                filter: blur(1px);
+            }
+            5% {
+                opacity: 0.3;
+                filter: blur(0);
+            }
+            10% {
+                opacity: 0.7;
+                transform: translateY(90vh) translateX(5px) scale(1);
+            }
+            50% {
+                opacity: 0.9;
+                transform: translateY(50vh) translateX(10px) scale(1.2);
+                filter: blur(0);
+            }
+            90% {
+                opacity: 0.7;
+                transform: translateY(10vh) translateX(15px) scale(1);
+            }
+            95% {
+                opacity: 0.3;
+                filter: blur(1px);
+            }
+            100% {
+                transform: translateY(-20vh) translateX(20px) scale(0.8);
+                opacity: 0;
+                filter: blur(2px);
+            }
+        }
+
+        /* Enhanced firework animation */
+        .firework {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: explode 1.5s ease-out forwards;
+            z-index: -1;
+            filter: blur(0.5px);
+        }
+
+        @keyframes explode {
+            0% { 
+                transform: scale(0); 
+                opacity: 1;
+                box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.3);
+            }
+            25% {
+                box-shadow: 0 0 20px 8px rgba(255, 255, 255, 0.6),
+                           0 0 40px 15px rgba(0, 191, 255, 0.4);
+            }
+            100% { 
+                transform: scale(4); 
+                opacity: 0;
+                box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* Improved prize items with better alignment */
+        .prize-list {
+            text-align: center;
+            margin: 1vh auto;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            animation: prizeGlow 3s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5vh;
+            max-width: 1200px;
+            width: 100%;
+            height: 35vh;
+            justify-content: center;
+        }
+
+        .prize-title {
+            margin-bottom: 1.5vh;
+            height: auto;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+        }
+
+        .prize-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            width: 600px;
+            max-width: 90%;
+            height: 7vh;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .prize-place {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary-color),
+                         0 0 20px var(--primary-color),
+                         0 0 30px var(--primary-color);
+            padding-right: 10px;
+            animation: placeGlow 3s ease-in-out infinite;
+            font-size: 1.1em;
+        }
+
+        @keyframes placeGlow {
+            0%, 100% { 
+                text-shadow: 0 0 5px var(--primary-color),
+                             0 0 15px var(--primary-color);
+            }
+            50% { 
+                text-shadow: 0 0 10px var(--primary-color),
+                             0 0 20px var(--primary-color),
+                             0 0 30px var(--primary-color);
+            }
+        }
+
+        .prize-description {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: left;
+            padding-left: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            
+            header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .challenge-text h2 {
+                font-size: 2rem;
+            }
+            
+            .challenge-text p {
+                font-size: 1rem;
+            }
+            
+            .prize-list {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .prize-item {
+                width: 90%;
+                max-width: 500px;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            /* 4K optimization */
+            :root {
+                --global--size: clamp(2rem, 4vw, 3rem);
+            }
+            
+            header {
+                max-width: 1200px;
+                padding: 2rem;
+            }
+            
+            header h1 {
+                font-size: 4.5rem;
+            }
+            
+            header h3 {
+                font-size: 2rem;
+            }
+            
+            .challenge-container {
+                max-width: 1400px;
+                padding: 3rem;
+            }
+            
+            .challenge-text h2 {
+                font-size: 3.5rem;
+            }
+            
+            .challenge-text p {
+                font-size: 1.8rem;
+                max-width: 1200px;
+            }
+            
+            button span {
+                font-size: 1.5em;
+                padding-inline: 2em;
+                padding-block: 1em;
+            }
+            
+            .prize-list {
+                font-size: 1.5rem;
+                gap: 2rem;
+            }
+            
+            .prize-item {
+                width: 700px;
+            }
+        }
+
+        @keyframes prizeGlow {
+            0%, 100% { 
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            }
+            50% { 
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        .prize-list strong {
+            color: var(--primary-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        /* Auto-hover animation for button */
+        @keyframes autoHover {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+                            inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+                            0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+                            0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+                            0 0 0 0 rgba(255, 255, 255, 1);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px rgba(0, 191, 255, 0.6),
+                            0 0 30px rgba(0, 191, 255, 0.4),
+                            inset 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        @keyframes autoGlow {
+            0%, 100% {
+                text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+                color: rgba(255, 255, 255, 0.9);
+            }
+            50% {
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                             0 0 20px var(--primary-color);
+                color: var(--primary-color);
+            }
+        }
+
+        @keyframes autoSweep {
+            0%, 100% {
+                left: -100%;
+            }
+            50% {
+                left: 100%;
+            }
+        }
+
+        #acceptButton {
+            animation: autoHover 4s infinite ease-in-out;
+        }
+
+        #acceptButton::before {
+            animation: autoSweep 4s infinite ease-in-out;
+        }
+
+        #acceptButton span {
+            animation: autoGlow 4s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <svg class="background-grid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="dottedGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1" fill="rgba(0,191,255,0.15)" />
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#dottedGrid)" />
+    </svg>
+
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <header>
+        <h1><span>Meet the Top</span> - <span style="color: var(--primary-color);">Challenge</span></h1>
+        <h3>Gewinne FIBO Karten für dein Team</h3>
+    </header>
+    
+    <div class="challenge-container">
+        <div class="challenge-text">
+            <h2>Schaffst du es in die Top 3 des Leaderboards?</h2>
+            <p>Scanne den QR Code, spiele das Game 2, schaffe es in die Top 3 des Leaderboards.</p>
+        </div>
+        
+        <div class="prize-list">
+            <p class="prize-title"><strong>Gewinne:</strong></p>
+            <div class="prize-item">
+                <div class="prize-place">1. Platz</div>
+                <div class="prize-description">5 FIBO Karten für dein Team</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-place">2. Platz</div>
+                <div class="prize-description">50€ Gutschein für den SimplixNutrion.de Shop</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-place">3. Platz</div>
+                <div class="prize-description">25€ Gutschein für den SimplixNutrition.de Shop</div>
+            </div>
+        </div>
+        
+        <div class="button-wrap">
+            <button id="acceptButton">
+                <span>Spielen und Gewinnen</span>
+            </button>
+            <div class="button-shadow"></div>
+        </div>
+    </div>
+
+    <script>
+        // Audio Context for sound effects
+        let audioContext;
+        let isSoundEnabled = true;
+        const acceptButton = document.getElementById('acceptButton');
+        const particlesContainer = document.getElementById('particlesContainer');
+
+        // Initialize audio context (will be created on first user interaction)
+        function initAudio() {
+            if (!audioContext && isSoundEnabled) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Add listeners for first interaction to init audio
+        document.addEventListener('click', initAudio, {once: true});
+        document.addEventListener('touchstart', initAudio, {once: true});
+
+        // Create floating particles
+        function createParticles() {
+            // Create more particles for a denser effect
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                const posX = Math.random() * 100;
+                particle.style.left = `${posX}%`;
+                particle.style.bottom = `-10px`;
+                
+                // Random size with more variation
+                const size = Math.random() * 6 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random animation delay
+                const delay = Math.random() * 15;
+                particle.style.animationDelay = `${delay}s`;
+                
+                // Random animation duration
+                const duration = Math.random() * 15 + 10;
+                particle.style.animationDuration = `${duration}s`;
+                
+                // Random horizontal movement
+                const xMovement = (Math.random() - 0.5) * 150;
+                particle.style.animationName = 'particleFloat';
+                particle.style.transform = `translateX(${xMovement}px)`;
+                
+                // Random color variation
+                if (Math.random() > 0.7) {
+                    const hue = 180 + Math.random() * 40; // Blue to cyan range
+                    particle.style.backgroundColor = `hsl(${hue}, 100%, 70%)`;
+                    particle.style.boxShadow = `0 0 10px 2px hsl(${hue}, 100%, 70%)`;
+                }
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Create star particles for the background
+            createStarryBackground();
+        }
+        
+        // Create a starry background
+        function createStarryBackground() {
+            // Create many stars for a dense star field
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star-particle');
+                
+                // Random position
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Random size
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                // Random animation delay
+                star.style.animationDelay = `${Math.random() * 4}s`;
+                
+                // Random brightness
+                if (Math.random() > 0.8) {
+                    // Make some stars brighter
+                    star.style.backgroundColor = '#ffffff';
+                    star.style.boxShadow = '0 0 10px 2px rgba(255, 255, 255, 0.8)';
+                } else if (Math.random() > 0.6) {
+                    // Make some stars blue-tinted
+                    star.style.backgroundColor = 'rgba(200, 235, 255, 0.9)';
+                } else {
+                    // Default white stars
+                    star.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                }
+                
+                document.body.appendChild(star);
+            }
+        }
+
+        // Create enhanced fireworks
+        function createFirework() {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = `${Math.random() * 100}%`;
+            firework.style.top = `${Math.random() * 100}%`;
+            
+            // Random color - blues and cyans with more variation
+            const hue = Math.floor(Math.random() * 60) + 170; // 170-230 range (blues to cyans)
+            firework.style.background = `hsl(${hue}, 100%, 60%)`;
+            
+            // Random size
+            const size = Math.random() * 8 + 6;
+            firework.style.width = `${size}px`;
+            firework.style.height = `${size}px`;
+            
+            document.body.appendChild(firework);
+            setTimeout(() => firework.remove(), 1500);
+            
+            // Create mini fireworks (sparks)
+            if (Math.random() > 0.5) {
+                setTimeout(() => {
+                    createMiniFireworks(firework.style.left, firework.style.top);
+                }, 100);
+            }
+        }
+        
+        // Create mini fireworks (sparks) around a main firework
+        function createMiniFireworks(x, y) {
+            const numSparks = Math.floor(Math.random() * 5) + 3;
+            
+            for (let i = 0; i < numSparks; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'firework';
+                
+                // Position near the parent firework
+                const offsetX = (Math.random() - 0.5) * 10;
+                const offsetY = (Math.random() - 0.5) * 10;
+                spark.style.left = `calc(${x} + ${offsetX}vw)`;
+                spark.style.top = `calc(${y} + ${offsetY}vh)`;
+                
+                // Smaller size
+                const size = Math.random() * 4 + 2;
+                spark.style.width = `${size}px`;
+                spark.style.height = `${size}px`;
+                
+                // Random color - whites and light blues
+                const hue = Math.floor(Math.random() * 40) + 190;
+                const lightness = Math.floor(Math.random() * 20) + 70;
+                spark.style.background = `hsl(${hue}, 80%, ${lightness}%)`;
+                
+                // Faster animation
+                spark.style.animationDuration = '0.8s';
+                
+                document.body.appendChild(spark);
+                setTimeout(() => spark.remove(), 800);
+            }
+        }
+
+        // Accept button click handler
+        acceptButton.addEventListener('click', () => {
+            playSound('button', 0.6);
+            
+            // Create fireworks
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    createFirework();
+                    playSound('firework', 0.3 + (Math.random() * 0.3));
+                }, i * 200);
+            }
+            
+            // Redirect after animation (optional)
+            setTimeout(() => {
+                // Uncomment to enable redirect
+                // window.location.href = '/games/game1/indexgame1 - animation funny sound.html';
+            }, 3000);
+        });
+
+        // Initialize particles on load
+        window.onload = () => {
+            createParticles();
+            
+            // Create occasional fireworks - more frequently
+            setInterval(() => {
+                if (Math.random() > 0.5) { // 50% chance every interval (increased from 30%)
+                    createFirework();
+                    if (isSoundEnabled && audioContext) {
+                        playSound('firework', 0.2);
+                    }
+                }
+            }, 2000); // Every 2 seconds instead of 3
+        };
+    </script>
+</body>
+</html> 

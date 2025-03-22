@@ -1,0 +1,4195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow">
+  <title>Lift and Earn - Display</title>
+  <style>
+    /* 
+      Basis-Reset für HTML und BODY 
+      - volle Breite und Höhe
+      - kein Margin/Padding
+    */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+
+    /* 
+      "outer-wrapper" nimmt die gesamte Fläche ein 
+      und positioniert Inhalte in Flex-Layout
+      => Top/Bottom Padding auf 3rem
+    */
+    .outer-wrapper {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between; 
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 3rem 1rem 3rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      width: 100%;
+      max-width: 800px;
+      box-sizing: border-box;
+      padding: 1.5rem 1rem;
+      position: relative;
+      animation: headerGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes headerGlow {
+      0% {
+        box-shadow: 0 0 5px #FFFFFF, 0 0 10px #FFFFFF, 0 0 15px #FFFFFF;
+      }
+      50% {
+        box-shadow: 0 0 15px #FFFFFF, 0 0 30px #FFFFFF, 0 0 45px #FFFFFF;
+      }
+      100% {
+        box-shadow: 0 0 5px #FFFFFF, 0 0 10px #FFFFFF, 0 0 15px #FFFFFF;
+      }
+    }
+
+    header h1 {
+      font-size: 3.5rem;
+      margin: 0;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.7);
+    }
+    header h1 span {
+      color: #00BFFF;
+    }
+    header h3 {
+      font-size: 1.5rem;
+      margin: 0.5rem 0 0 0;
+      color: #fff;
+    }
+
+    /* Media query for 16:9 aspect ratio (landscape with ratio ~1.77:1) */
+    @media (min-aspect-ratio: 16/9) {
+      header {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      header h1 {
+        font-size: 3rem;
+      }
+      
+      header h3 {
+        color: #00BFFF;
+        font-size: 1.2rem;
+        margin-top: 0.25rem;
+      }
+      
+      .qr-container {
+        width: 128px !important;
+        height: 128px !important;
+        max-width: 128px !important;
+      }
+      
+      #qrCode {
+        width: 128px !important;
+        height: 128px !important;
+      }
+      
+      #qrCode img, 
+      #qrCode canvas {
+        width: 128px !important;
+        height: 128px !important;
+        max-width: 128px !important;
+        max-height: 128px !important;
+      }
+      
+      #qrTimer {
+        font-size: 0.9rem;
+      }
+      
+      .game-images {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1.5rem 0;
+      }
+      
+      .game-images img {
+        height: 150px;
+        width: auto;
+        filter: brightness(0.8);
+        transition: transform 0.3s ease, filter 0.3s ease;
+      }
+    }
+
+    /* Media query for 9:16 aspect ratio (portrait) */
+    @media (max-aspect-ratio: 9/16) {
+      .outer-wrapper {
+        padding: 2rem 1rem 1rem 1rem;
+        justify-content: flex-start;
+        height: 100vh;
+      }
+
+      header {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+      }
+
+      header h1 {
+        font-size: 3rem;
+      }
+
+      header h3 {
+        font-size: 1.3rem;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .content-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5rem;
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+
+      .qr-section {
+        position: fixed;
+        bottom: 2rem;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .qr-container {
+        width: 256px;
+        height: 256px;
+        position: relative;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+        overflow: visible;
+      }
+
+      #qrCode {
+        width: 256px;
+        height: 256px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+      }
+
+      #qrCode img, 
+      #qrCode canvas {
+        width: 256px;
+        height: 256px;
+        display: block;
+        aspect-ratio: 1;
+        margin: 0 auto;
+      }
+
+      #qrTimer {
+        margin-top: 0.5rem;
+        text-align: center;
+        font-size: 1.1rem;
+        color: #00BFFF;
+      }
+
+      .game-images {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin: 1rem 0;
+      }
+
+      .game-images img {
+        height: 150px;
+        width: auto;
+        filter: brightness(0.8);
+        transition: transform 0.3s ease, filter 0.3s ease;
+      }
+    }
+
+    /* Base styles for leaderboard */
+    .leaderboard-section {
+        position: fixed;
+        width: min(95%, 2000px);
+        background-color: rgba(0, 0, 0, 0.75);
+        border-radius: 10px;
+        padding: min(4vh, 1.5rem);
+        box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+        z-index: 1000;
+        -webkit-backdrop-filter: blur(5px);
+        backdrop-filter: blur(5px);
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    /* Positioning for 16:9 (landscape) */
+    @media (min-aspect-ratio: 16/9) {
+        .leaderboard-section {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+    }
+
+    /* Positioning for 9:16 (portrait) */
+    @media (max-aspect-ratio: 9/16) {
+        .leaderboard-section {
+            top: calc(20vh + 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            max-height: calc(75vh - 2rem);
+            overflow-y: auto;
+        }
+    }
+
+    .leaderboard-section.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Update the leaderboard column widths */
+    .leaderboard-header {
+        display: grid;
+        grid-template-columns: 80px 0.8fr 100px 100px 150px 100px;
+        gap: 1rem;
+        background-color: rgba(0, 191, 255, 0.2);
+        padding: min(3vh, 1rem);
+        border-radius: 5px 5px 0 0;
+        font-weight: bold;
+        color: #00BFFF;
+        margin-bottom: 10px;
+        position: sticky;
+        top: 0;
+    }
+
+    .leaderboard-header > div {
+        text-align: center;
+    }
+
+    .leaderboard-header > div:nth-child(2) {
+        text-align: left;
+        padding-left: min(2vw, 15px);
+    }
+
+    /* Glow animations for top positions */
+    @keyframes goldGlow {
+        0% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 215, 0, 0.4); }
+        100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+    }
+
+    @keyframes silverGlow {
+        0% { box-shadow: 0 0 5px rgba(192, 192, 192, 0.5); }
+        50% { box-shadow: 0 0 25px rgba(192, 192, 192, 0.8), 0 0 40px rgba(192, 192, 192, 0.4); }
+        100% { box-shadow: 0 0 5px rgba(192, 192, 192, 0.5); }
+    }
+
+    @keyframes bronzeGlow {
+        0% { box-shadow: 0 0 5px rgba(205, 127, 50, 0.5); }
+        50% { box-shadow: 0 0 20px rgba(205, 127, 50, 0.8), 0 0 30px rgba(205, 127, 50, 0.4); }
+        100% { box-shadow: 0 0 5px rgba(205, 127, 50, 0.5); }
+    }
+
+    .rank-1 {
+        background: rgba(255, 215, 0, 0.2);
+        color: #FFD700;
+        animation: goldGlow 2s infinite;
+    }
+
+    .rank-2 {
+        background: rgba(192, 192, 192, 0.2);
+        color: #C0C0C0;
+        animation: silverGlow 2s infinite;
+    }
+
+    .rank-3 {
+        background: rgba(205, 127, 50, 0.2);
+        color: #CD7F32;
+        animation: bronzeGlow 2s infinite;
+    }
+
+    .leaderboard-entry {
+        display: grid;
+        grid-template-columns: 80px 0.8fr 100px 100px 150px 100px;
+        gap: 0.5rem;
+        padding: 0.8rem 0.5rem;
+        margin: 0.3rem 0;
+        border-radius: 5px;
+        background: rgba(0, 191, 255, 0.1);
+        align-items: center;
+        text-align: center;
+    }
+
+    .leaderboard-entry > div:nth-child(2) {
+        text-align: left;
+        padding-left: min(2vw, 15px);
+    }
+
+    /* Scrollbar styling */
+    .leaderboard-section::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .leaderboard-section::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+    }
+
+    .leaderboard-section::-webkit-scrollbar-thumb {
+        background: rgba(0, 191, 255, 0.5);
+        border-radius: 4px;
+    }
+
+    .leaderboard-section::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 191, 255, 0.7);
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { background-color: rgba(255, 215, 0, 0.2); }
+      50% { background-color: rgba(255, 215, 0, 0.4); }
+      100% { background-color: rgba(255, 215, 0, 0.2); }
+    }
+
+    /* Animation for the game images hover effect */
+    @keyframes iconHover {
+      0% {
+        transform: scale(1);
+        filter: brightness(0.8);
+      }
+      10% {
+        transform: scale(1.15);
+        filter: brightness(1.2) drop-shadow(0 0 8px rgba(0, 191, 255, 0.8));
+      }
+      20% {
+        transform: scale(1);
+        filter: brightness(0.8);
+      }
+      100% {
+        transform: scale(1);
+        filter: brightness(0.8);
+      }
+    }
+
+    /* Container für den Hauptinhalt (QR + Timer + mirroredContent) */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1; /* Damit dieser Bereich sich ausdehnt */
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Content container for better spacing in all aspect ratios */
+    .content-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    /* Game images styling for all aspect ratios */
+    .game-images {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .game-images img {
+      height: 150px;
+      width: auto;
+      filter: brightness(0.8);
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    /* Apply animations to each image with different delays for all aspect ratios */
+    .game-images img:nth-child(1) {
+      animation: iconHover 6s infinite;
+      animation-delay: 0s;
+    }
+    
+    .game-images img:nth-child(2) {
+      animation: iconHover 6s infinite;
+      animation-delay: 2s;
+    }
+    
+    .game-images img:nth-child(3) {
+      animation: iconHover 6s infinite;
+      animation-delay: 4s;
+    }
+
+    /* Instruction text styling for all aspect ratios */
+    .instruction-text {
+      font-size: 28px;
+      text-align: center;
+      color: #00BFFF;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      background-color: rgba(0, 191, 255, 0.1);
+    }
+
+    #mirroredContent {
+      font-size: 2.5rem;
+      text-align: center;
+      width: 100%;
+      font-weight: bold;
+      margin: 1rem 0;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    /* QR-Container inkl. Timer */
+    .qr-container {
+      margin: 0 auto;
+      max-width: 300px;
+      position: relative;
+      overflow: visible; /* Ensure full QR code visibility */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #qrCode {
+      display: block;
+      text-align: center;
+      position: relative;
+      width: 256px;  /* Match QR code size */
+      height: 256px; /* Match QR code size */
+      margin: 0 auto;
+      overflow: visible; /* Ensure full QR code visibility */
+    }
+    #qrCode img, #qrCode canvas {
+      display: block;
+      margin: 0 auto;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 2;
+      max-width: 100%; /* Prevent size increase */
+      max-height: 100%; /* Prevent size increase */
+    }
+    /* Make sure the canvas element is always properly contained */
+    #qrCode canvas {
+      margin: 0 auto;
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    /* Timer-Text, direkt darunter */
+    #qrTimer {
+      margin-top: 0.5rem;
+      text-align: center;
+      font-size: 1.2rem;
+      color: #00BFFF;
+      min-height: 1.2em; /* reserviert Platz */
+    }
+
+    /* New glow effect with pseudo-element */
+    .qr-code-glow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 4px;
+      z-index: 1;
+      animation: pulseGlow 4s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from {
+        box-shadow: 0 0 20px #00BFFF, 0 0 40px #00BFFF;
+        opacity: 0.5;
+      }
+      to {
+        box-shadow: 0 0 30px #00BFFF, 0 0 60px #00BFFF;
+        opacity: 0.8;
+      }
+    }
+
+    /* Text-Spiegelung oder iFrame */
+    #mirroredContent {
+      font-size: 2.5rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    #mirroredFrame {
+      border: none;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      background: #000;
+    }
+
+    /* Add new styles for success animation and leaderboard iframe */
+    #mirroredFrame.fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      z-index: 1000;
+      background: #000;
+    }
+
+    /* Ensure content is centered in 4K displays */
+    @media (min-width: 2560px) {
+      #mirroredFrame.fullscreen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    /* Timer */
+    #timer {
+      font-size: 1.3rem;
+      color: #00BFFF;
+      margin: 1rem 0;
+      text-align: center;
+      min-height: 1.2em; /* verhindert Springen */
+    }
+
+    /* Buttons am unteren Rand */
+    .placeholder-buttons {
+      display: none; /* Hide all buttons, previously was 'flex' */
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .placeholder-buttons button {
+      background-color: #00BFFF;
+      border: none;
+      padding: 0.8rem 1.2rem;
+      font-size: 1rem;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .placeholder-buttons button:hover {
+      background-color: #009acd;
+    }
+
+    /*
+      Media Queries für Hochformat (Portrait) und Querformat (Landscape).
+      In den meisten Browsern/Devices funktioniert orientation recht gut.
+    */
+    @media (orientation: portrait) {
+      .outer-wrapper {
+        /* Hochformat: Inhalte eher gestapelt, zentriert */
+        flex-direction: column;
+      }
+      header h1 {
+        font-size: 2.5rem;
+      }
+      header h3 {
+        font-size: 1.1rem;
+      }
+      #mirroredContent {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (orientation: landscape) {
+      .outer-wrapper {
+        padding: 2rem 1rem;
+        justify-content: flex-start;
+      }
+      header h1 {
+        font-size: 3.2rem;
+      }
+      header h3 {
+        font-size: 1.3rem;
+      }
+      #mirroredContent {
+        font-size: 2rem;
+      }
+    }
+
+    /* Kleine Bildschirme (z.B. max. 768px) */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      header h3 {
+        font-size: 1rem;
+      }
+      #mirroredContent {
+        font-size: 1.5rem;
+      }
+      #timer {
+        font-size: 1rem;
+      }
+      .placeholder-buttons button {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Sehr große Bildschirme (z.B. 4K oder 16:9 TV) */
+    @media (min-width: 1920px) {
+      header h1 {
+        font-size: 4rem;
+      }
+      header h3 {
+        font-size: 1.8rem;
+      }
+      #mirroredContent {
+        font-size: 2.5rem;
+      }
+      #timer {
+        font-size: 1.5rem;
+      }
+      /* Reduce QR code size by 50% on high performance/4K displays */
+      #qrCode {
+        width: 128px !important;
+        height: 128px !important;
+      }
+      #qrCode img, #qrCode canvas {
+        max-width: 100%;
+        max-height: 100%;
+      }
+    }
+
+    /* New styles for logon animation */
+    #logonAnimation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 1100;
+    }
+    /* Keyframes for a full cycle:
+       - 5 seconds rotating clockwise (360deg) 
+       - 5 seconds rotating counterclockwise back to 0deg 
+       One cycle lasts 10s and repeats 5 times.
+       The transform now also scales the image 2x and sets opacity to 0.5.
+    */
+    @keyframes pulsateAnimation {
+      0%   { transform: scale(1); opacity: 0.3; }
+      50%  { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+    .funny-animate {
+      animation: pulsateAnimation 3s ease-in-out infinite;
+    }
+
+    /* Animation keyframes for success message */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Leaderboard styles */
+    .leaderboard-section {
+      width: 100%;
+      max-width: min(95%, 2000px);
+      margin: min(4vh, 2rem) auto;
+      padding: min(4vh, 1.5rem);
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+      display: none;
+    }
+
+    .leaderboard-section h2 {
+      color: #00BFFF;
+      text-align: center;
+      font-size: min(5vw, 2.5rem);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+    }
+
+    .leaderboard-container {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .leaderboard-header {
+      display: grid;
+      grid-template-columns: 80px 0.8fr 100px 100px 150px 100px;
+      gap: 0.5rem;
+      background-color: rgba(0, 191, 255, 0.3);
+      padding: 0.8rem 0.5rem;
+      border-radius: 5px 5px 0 0;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 0;
+      position: sticky;
+      top: 0;
+      text-align: center;
+    }
+
+    .leaderboard-header > div {
+      text-align: center;
+    }
+
+    .leaderboard-header > div:nth-child(2) {
+      text-align: left;
+    }
+
+    .leaderboard-list {
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .leaderboard-entry {
+      display: grid;
+      grid-template-columns: 80px 0.8fr 100px 100px 150px 100px;
+      gap: 0.5rem;
+      padding: 0.8rem 0.5rem;
+      margin: 0.3rem 0;
+      border-radius: 5px;
+      background: rgba(0, 191, 255, 0.1);
+      align-items: center;
+      text-align: center;
+    }
+
+    .leaderboard-entry > div {
+      text-align: center;
+    }
+
+    .leaderboard-entry > div:nth-child(2) {
+      text-align: left;
+    }
+
+    .rank-column {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .rank-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      background-color: rgba(0, 191, 255, 0.2);
+    }
+
+    .rank-1 .rank-badge {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: #000;
+    }
+
+    .rank-2 .rank-badge {
+      background: linear-gradient(45deg, #C0C0C0, #A9A9A9);
+      color: #000;
+    }
+
+    .rank-3 .rank-badge {
+      background: linear-gradient(45deg, #CD7F32, #8B4513);
+      color: #000;
+    }
+
+    /* Specific column adjustments for 16:9 */
+    @media (min-aspect-ratio: 16/9) {
+        .leaderboard-section {
+            width: min(90%, 1200px);
+        }
+        
+        .leaderboard-header, .leaderboard-entry {
+            grid-template-columns: 80px 0.8fr 100px 100px 150px 100px;
+        }
+    }
+
+    /* Positioning for 9:16 (portrait) */
+    @media (max-aspect-ratio: 9/16) {
+        .leaderboard-section {
+            width: min(95%, 800px);
+        }
+        
+        .leaderboard-header, .leaderboard-entry {
+            grid-template-columns: 60px 0.8fr 80px 80px 120px 80px;
+            font-size: 0.9rem;
+        }
+    }
+
+    .name-column {
+      flex: 1;
+      text-align: left;
+      padding-left: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .games-column {
+      flex: 0 0 80px;
+      text-align: center;
+    }
+
+    .points-column {
+      flex: 0 0 80px;
+      text-align: center;
+    }
+
+    .gym-column {
+      flex: 0 0 120px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tier-column {
+      flex: 0 0 80px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trophy {
+      margin-left: 8px;
+      font-size: 1.2em;
+    }
+
+    .loading-message {
+      text-align: center;
+      padding: 2rem;
+      color: #00BFFF;
+    }
+
+    /* Media queries for responsive leaderboard */
+    @media (max-width: 768px) {
+      .leaderboard-section {
+        padding: 0.5rem;
+      }
+
+      .leaderboard-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .gym-column {
+        flex: 0 0 80px;
+      }
+      
+      .tier-column {
+        flex: 0 0 60px;
+      }
+
+      .games-column {
+        flex: 0 0 60px;
+      }
+
+      .points-column {
+        flex: 0 0 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .rank-column {
+        flex: 0 0 40px;
+      }
+
+      .games-column {
+        flex: 0 0 50px;
+      }
+
+      .points-column {
+        flex: 0 0 50px;
+      }
+    }
+
+    /* Animation for top player */
+    @keyframes pulse {
+      0% { background-color: rgba(255, 215, 0, 0.2); }
+      50% { background-color: rgba(255, 215, 0, 0.4); }
+      100% { background-color: rgba(255, 215, 0, 0.2); }
+    }
+
+    /* Add new media query for 4K displays in landscape mode */
+    @media screen and (min-width: 3840px) and (orientation: landscape) {
+      /* Header adjustments for 4K */
+      header {
+        padding: 4vh;
+        margin-bottom: 2vh;
+      }
+
+      header h1 {
+        font-size: min(6vw, 4rem);
+      }
+
+      header h3 {
+        font-size: min(3vw, 2rem);
+        margin-top: 1vh;
+      }
+
+      /* Leaderboard section adjustments for 4K */
+      .leaderboard-section {
+        max-width: 2000px;
+        margin: 8vh auto 4vh auto;
+        padding: 4vh;
+      }
+
+      .leaderboard-section h2 {
+        font-size: min(5vw, 3.5rem);
+        margin-bottom: 3vh;
+      }
+
+      .leaderboard-header {
+        grid-template-columns: 120px 1fr 150px 150px 300px 150px;
+        padding: 2vh 3vh;
+        font-size: min(2vw, 1.5rem);
+      }
+
+      .leaderboard-entry {
+        grid-template-columns: 120px 1fr 150px 150px 300px 150px;
+        padding: 2vh 3vh;
+        margin: 1vh 0;
+        font-size: min(2vw, 1.5rem);
+      }
+
+      .rank-badge {
+        width: 60px;
+        height: 60px;
+        font-size: min(2.5vw, 2rem);
+      }
+
+      .loading-message {
+        padding: 4vh;
+        font-size: min(3vw, 2rem);
+      }
+
+      .leaderboard-list {
+        max-height: 70vh;
+      }
+
+      /* Trophy icon size adjustment */
+      .trophy {
+        font-size: min(3vw, 2rem);
+      }
+
+      /* Adjust scrollbar for better visibility */
+      .leaderboard-list::-webkit-scrollbar {
+        width: 15px;
+      }
+
+      .leaderboard-list::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 191, 255, 0.5);
+        border-radius: 10px;
+      }
+
+      .leaderboard-list::-webkit-scrollbar-track {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+      }
+    }
+  </style>
+
+  <!-- QRCode Bibliothek -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="/js/particleAnimation.js"></script>
+
+  <!-- Füge diese Zeilen im <head> Bereich ein -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <!-- Add Firestore script -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Add Realtime Database script -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.1/firebase-ui-auth.css" />
+</head>
+<body>
+  <div class="outer-wrapper">
+    <header>
+      <h1>Lift and <span>Earn</span></h1>
+      <h3>Simplix Gym Rewards</h3>
+    </header>
+
+    <!-- Add leaderboard section here -->
+    <div id="leaderboard" class="leaderboard-section">
+      <h2>Top Players</h2>
+      <div class="leaderboard-container">
+        <div class="leaderboard-header">
+          <div class="rank-column">Rank</div>
+          <div class="name-column">Player</div>
+          <div class="games-column">Games</div>
+          <div class="points-column">Points</div>
+          <div class="gym-column">Studio</div>
+          <div class="tier-column">Tier</div>
+        </div>
+        <div id="leaderboardList" class="leaderboard-list">
+          <div class="loading-message">Loading leaderboard data...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="content-container">
+        <div id="mirroredContent">scan and collect</div>
+        
+        <!-- Add the images in horizontal order with correct path -->
+        <div class="game-images">
+          <img src="/games/assets/qrcodescreenimage1.png" alt="Item 1">
+          <img src="/games/assets/qrcodescreenimage2.png" alt="Item 2">
+          <img src="/games/assets/qrcodescreenimage3.png" alt="Item 3">
+        </div>
+        
+        <!-- Add instruction text -->
+        <div class="instruction-text">
+          Klicke die Items in der richtigen Reihenfolge
+        </div>
+      </div>
+
+      <!-- QR code section with timer below -->
+      <div class="qr-section">
+        <div class="qr-container">
+          <div id="qrCode"></div>
+        </div>
+        <div id="qrTimer"></div>
+        <div id="timer"></div>
+      </div>
+    </div>
+
+    <div class="placeholder-buttons">
+      <button onclick="placeholderGame1()">Game 1</button>
+      <button onclick="placeholderGame2()">Game 2</button>
+      <button onclick="placeholderQrCodeLogin()">Login</button>
+      <button onclick="placeholderLeaderboard()">Leaderboard</button>
+    </div>
+  </div>
+
+  <iframe id="mirroredFrame"></iframe>
+
+  <!-- Animation container (hidden by default) -->
+  <div id="logonAnimation">
+    <!-- Fix for animation.png path 24.02.2025 start -->
+    <img src="/animation.png" alt="Logon Animation">
+    <!-- 24.02.2025 end -->
+  </div>
+
+  <canvas id="particleCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
+
+  <!-- Firebase v9+ SDK (modular) -->
+  <script type="module">
+    import { 
+      rtdb, 
+      ref, 
+      set, 
+      onValue, 
+      serverTimestamp 
+    } from '/js/firebase-services.js';
+    
+    // Make functions available to non-module scripts
+    window.firebaseRTDB = {
+      setDisplayContent: async function(displayId, content) {
+        if (!displayId) {
+          return Promise.reject(new Error("Invalid display ID"));
+        }
+        
+        try {
+          // Optimize database writes - only write what's necessary
+          if (content === null) {
+            // For null content (clearing display), just update the timestamp
+            // This prevents accumulating many unused entries
+            await set(ref(rtdb, `displays/${displayId}`), {
+              lastUpdated: serverTimestamp()
+            });
+          } else if (content === "CONNECTED") {
+            // For heartbeat/connection messages, only update timestamp
+            // This significantly reduces database size for frequent connection checks
+            await set(ref(rtdb, `displays/${displayId}/lastUpdated`), serverTimestamp());
+          } else {
+            // For actual content changes, update both fields
+            await set(ref(rtdb, `displays/${displayId}`), {
+              content: content,
+              lastUpdated: serverTimestamp()
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error("Error setting display content:", error);
+          throw error;
+        }
+      },
+      
+      listenToDisplay: function(displayId, callback) {
+        if (!displayId) {
+          console.error("Invalid display ID");
+          return null;
+        }
+        
+        const displayRef = ref(rtdb, `displays/${displayId}`);
+        return onValue(displayRef, (snapshot) => {
+          callback(snapshot.val());
+        });
+      }
+    };
+    
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      // Your initialization code here
+      initializeApp();
+    });
+  </script>
+
+  <!-- Legacy script for compatibility -->
+  <script>
+    // Initialize Firebase in compat mode
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+        authDomain: window.location.hostname.includes('web.app') 
+          ? "simplixgymrewards.web.app" 
+          : "simplixgymrewards.firebaseapp.com",
+        databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "simplixgymrewards",
+        storageBucket: "simplixgymrewards.firebasestorage.app",
+        messagingSenderId: "821049711023",
+        appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+      });
+    }
+    
+    // Move this to the top of the script section, right after Firebase initialization
+    window.addEventListener('beforeunload', function() {
+        ParticleAnimation.stop();
+        
+        // Clear our display content on unload to prevent stale entries
+        const displayId = localStorage.getItem("displayId");
+        if (displayId) {
+            // Try to clean up our database entry
+            try {
+                window.firebaseRTDB.setDisplayContent(displayId, null);
+                console.log("Cleared display data on page unload");
+            } catch (error) {
+                console.error("Error clearing display data:", error);
+            }
+        }
+    });
+
+    //fix device detection 22.02.2025 start//
+    function isAndroid() {
+      return /android/i.test(navigator.userAgent);
+    }
+
+    function isAndroid9OrLower() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const androidMatch = userAgent.match(/android\s([0-9.]*)/);
+      if (androidMatch) {
+        const version = parseInt(androidMatch[1]);
+        return version <= 9;
+      }
+      return false;
+    }
+    const isLowEndDevice = isAndroid9OrLower();
+    //22.02.2025 end//
+
+    function isConnectionStale(lastUpdated) {
+      return Date.now() - lastUpdated > 2 * 60 * 1000; // 2 minutes
+    }
+
+    // Enhanced display ID management with device fingerprinting
+    function getOrCreateDisplayId() {
+        // Try to get existing display ID
+        let displayId = localStorage.getItem("displayId");
+        
+        // Check if we need to create a new one
+        if (!displayId) {
+            // Generate a somewhat stable device fingerprint
+            const screenFingerprint = `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`;
+            const browserInfo = navigator.userAgent;
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            
+            // Create a more stable fingerprint by hashing these values
+            let deviceHash = hashString(`${screenFingerprint}-${browserInfo}-${timeZone}`);
+            
+            // Generate a display ID using the first 8 chars of the hash
+            displayId = "display_" + deviceHash.substring(0, 8);
+            
+            // Store in localStorage
+            localStorage.setItem("displayId", displayId);
+            console.log("Created new persistent display ID:", displayId);
+        }
+        
+        return displayId;
+    }
+    
+    // Simple string hashing function
+    function hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        // Convert to hex string and ensure positive
+        return Math.abs(hash).toString(16);
+    }
+    
+    // Setup cleanup for stale display entries
+    function setupDisplayCleanup() {
+        // Run cleanup every 2 minutes (aligned with stale threshold)
+        const CLEANUP_INTERVAL = 2 * 60 * 1000;
+        
+        function cleanupStaleDisplays() {
+            console.log("Running automatic display cleanup");
+            
+            // Only proceed if we have the rtdb module available
+            if (window.firebaseRTDB) {
+                try {
+                    // Get reference to the database
+                    const dbRef = firebase.database().ref('displays');
+                    
+                    // Query for entries
+                    dbRef.once('value')
+                        .then(snapshot => {
+                            const now = Date.now();
+                            const staleThreshold = 2 * 60 * 1000; // 2 minutes (aligned with isConnectionStale definition)
+                            let deletedCount = 0;
+                            
+                            // Our current display ID should not be deleted
+                            const currentDisplayId = localStorage.getItem("displayId");
+                            
+                            // Process all entries
+                            snapshot.forEach(childSnapshot => {
+                                const displayKey = childSnapshot.key;
+                                const displayData = childSnapshot.val();
+                                
+                                // Skip our own display
+                                if (displayKey === currentDisplayId) return;
+                                
+                                // Check if stale
+                                if (!displayData || !displayData.lastUpdated || 
+                                    (now - displayData.lastUpdated > staleThreshold)) {
+                                    // Remove this stale entry
+                                    dbRef.child(displayKey).remove()
+                                        .then(() => {
+                                            console.log(`Removed stale display: ${displayKey}`);
+                                            deletedCount++;
+                                        })
+                                        .catch(error => {
+                                            console.error(`Error removing display ${displayKey}:`, error);
+                                        });
+                                }
+                            });
+                            
+                            console.log(`RTDB cleanup completed. Removed ${deletedCount} stale entries.`);
+                        })
+                        .catch(error => {
+                            console.error("Error during RTDB display cleanup:", error);
+                        });
+                    
+                    // Also clean up Firestore displays collection
+                    cleanupFirestoreDisplays();
+                } catch (error) {
+                    console.error("Error accessing database for cleanup:", error);
+                }
+            }
+        }
+        
+        // Firestore display cleanup function
+        async function cleanupFirestoreDisplays() {
+            try {
+                console.log("Running Firestore displays cleanup");
+                
+                // Only run if Firestore is available
+                if (firebase.firestore) {
+                    const db = firebase.firestore();
+                    const displaysRef = db.collection('displays');
+                    const now = Date.now();
+                    const staleThreshold = 2 * 60 * 1000; // 2 minutes (aligned with isConnectionStale definition)
+                    let deletedCount = 0;
+                    
+                    // Our current display ID should not be deleted
+                    const currentDisplayId = localStorage.getItem("displayId");
+                    
+                    // Get all display documents
+                    const snapshot = await displaysRef.get();
+                    
+                    // Process in batches for efficiency
+                    const batch = db.batch();
+                    let batchCount = 0;
+                    
+                    snapshot.forEach(doc => {
+                        const displayData = doc.data();
+                        const displayId = doc.id;
+                        
+                        // Skip our own display
+                        if (displayId === currentDisplayId) return;
+                        
+                        // Check if stale using lastSeen field
+                        if (!displayData.lastSeen) {
+                            // No lastSeen field, consider stale
+                            batch.delete(doc.ref);
+                            batchCount++;
+                            deletedCount++;
+                        } else {
+                            // Convert Firestore timestamp to milliseconds
+                            let lastSeen;
+                            if (displayData.lastSeen.toMillis) {
+                                // Firestore Timestamp object
+                                lastSeen = displayData.lastSeen.toMillis();
+                            } else if (displayData.lastSeen.seconds) {
+                                // Firestore Timestamp in seconds
+                                lastSeen = displayData.lastSeen.seconds * 1000;
+                            } else {
+                                // Regular Date
+                                lastSeen = new Date(displayData.lastSeen).getTime();
+                            }
+                            
+                            if (now - lastSeen > staleThreshold) {
+                                batch.delete(doc.ref);
+                                batchCount++;
+                                deletedCount++;
+                            }
+                        }
+                        
+                        // Commit batch if it reaches 500 operations (Firestore limit)
+                        if (batchCount >= 500) {
+                            batch.commit()
+                                .then(() => console.log(`Batch of ${batchCount} stale Firestore displays deleted`))
+                                .catch(error => console.error("Error committing batch delete:", error));
+                            
+                            // Reset for next batch
+                            batchCount = 0;
+                        }
+                    });
+                    
+                    // Commit any remaining operations
+                    if (batchCount > 0) {
+                        await batch.commit();
+                    }
+                    
+                    console.log(`Firestore cleanup completed. Removed ${deletedCount} stale entries.`);
+                }
+            } catch (error) {
+                console.error("Error during Firestore display cleanup:", error);
+            }
+        }
+        
+        // Run initial cleanup after 1 minute
+        setTimeout(cleanupStaleDisplays, 1 * 60 * 1000);
+        
+        // Schedule regular cleanup
+        setInterval(cleanupStaleDisplays, CLEANUP_INTERVAL);
+    }
+
+    // Use our enhanced display ID management
+    var displayId = getOrCreateDisplayId();
+
+    var qrCodeElement = document.getElementById("qrCode");
+    var qrTimerElement = document.getElementById("qrTimer");
+    var qrInterval;
+    var connectionTimeout;
+    
+    // Initialize cleanup mechanism
+    document.addEventListener('DOMContentLoaded', function() {
+        setupDisplayCleanup();
+    });
+
+    function generateTimeBasedQRCode() {
+      console.log("QR code generation started");
+      
+      // First ensure the QR container is visible
+      const qrContainer = document.querySelector(".qr-container");
+      if (qrContainer) {
+        qrContainer.style.display = "block";
+      }
+      
+      // COMPLETE CLEANUP: Remove any existing QR code and related elements
+      const existingQRElement = document.getElementById("qrCode");
+      if (existingQRElement && existingQRElement.parentNode) {
+        existingQRElement.parentNode.removeChild(existingQRElement);
+        console.log("Removed existing QR code element before generation");
+      }
+      
+      // Also check for and remove any orphaned frames or elements that might be left behind
+      const orphanedFrames = qrContainer.querySelectorAll("iframe, canvas:not(#qrCode canvas)");
+      orphanedFrames.forEach(frame => {
+        // Ensure we're not removing game images
+        if (!frame.closest('.game-images')) {
+          frame.parentNode.removeChild(frame);
+          console.log("Removed orphaned frame element");
+        }
+      });
+      
+      // Create a fresh QR code element
+      const newQRElement = document.createElement("div");
+      newQRElement.id = "qrCode";
+      newQRElement.style.cssText = "display: block; text-align: center; width: 256px; height: 256px; position: relative; overflow: hidden; margin: 0 auto;";
+      
+      // Add to container
+      if (qrContainer) {
+        qrContainer.appendChild(newQRElement);
+        console.log("Created new QR code element");
+        // Update global reference
+        qrCodeElement = newQRElement;
+      } else {
+        console.error("QR code element not found and couldn't be created");
+        return; // Exit if we can't find or create the element
+      }
+      
+      // Generate new time window and code
+      const timeWindow = Math.floor(Date.now() / 45000);
+      const codeData = `${timeWindow}-${displayId}`;
+      const displayCode = btoa(codeData);
+
+      // Determine base URL
+      var baseUrl = window.location.hostname === "localhost" 
+        ? "http://localhost:5000"
+        : "https://simplixgymrewards.web.app";
+      const controllerUrl = `${baseUrl}/controller.html?code=${encodeURIComponent(displayCode)}`;
+      console.log("QR code URL generated:", controllerUrl);
+
+      try {
+        // Generate new QR code with explicit options
+        console.log("Generating QR code...");
+        const qr = new QRCode(qrCodeElement, {
+          text: controllerUrl,
+          width: 256,
+          height: 256,
+          colorDark: "#FFFFFF",
+          colorLight: "#000000",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        console.log("QR code generated");
+        
+        // Ensure QR code is properly displayed
+        const qrImg = qrCodeElement.querySelector("img");
+        if (qrImg) {
+          qrImg.style.margin = "0 auto";
+          qrImg.style.display = "block";
+          qrImg.style.width = "256px";
+          qrImg.style.height = "256px";
+          console.log("QR code image styled");
+        } else {
+          console.warn("QR code image element not found");
+        }
+        
+        const qrCanvas = qrCodeElement.querySelector("canvas");
+        if (qrCanvas) {
+          qrCanvas.style.margin = "0 auto";
+          qrCanvas.style.display = "block";
+          qrCanvas.style.width = "256px";
+          qrCanvas.style.height = "256px";
+          console.log("QR code canvas styled");
+        } else {
+          console.warn("QR code canvas element not found");
+        }
+
+        // Delayed check - clean up any orphaned frames that might appear after QR generation
+        setTimeout(() => {
+          console.log("Running delayed cleanup of orphaned elements");
+          const qrContainer = document.querySelector(".qr-container");
+          if (qrContainer) {
+            // Only remove elements that aren't part of the main QR code or game images
+            const orphanedElements = qrContainer.querySelectorAll("iframe, canvas:not(#qrCode canvas), img:not(#qrCode img):not(.game-images img)");
+            orphanedElements.forEach(element => {
+              if (element.parentNode && !element.closest('.game-images')) {
+                element.parentNode.removeChild(element);
+                console.log("Removed delayed orphaned element:", element.tagName);
+              }
+            });
+          }
+        }, 500);
+
+        // Reset and start timer
+        let timeLeft = 45;
+        qrTimerElement.textContent = `QR Code expires in ${timeLeft} seconds`;
+        console.log("QR code timer set");
+
+        // Clear existing interval if any
+        if (qrInterval) {
+          clearInterval(qrInterval);
+        }
+
+        // Set up new interval
+        qrInterval = setInterval(() => {
+          timeLeft--;
+          qrTimerElement.textContent = `QR Code expires in ${timeLeft} seconds`;
+          if (timeLeft <= 0) {
+            clearInterval(qrInterval);
+            // Force a new QR code generation
+            setTimeout(() => {
+              generateTimeBasedQRCode();
+            }, 100);
+          }
+        }, 1000);
+
+        // Apply glow effect based on device capability
+        if (!isLowEndDevice) {
+          qrCodeElement.classList.add('qr-code-glow');
+        } else {
+          qrCodeElement.classList.remove('qr-code-glow');
+        }
+        
+        // Verify QR code creation was successful
+        setTimeout(() => {
+          if (isQRCodeVisible()) {
+            console.log("QR code verification successful");
+          } else {
+            console.error("QR code elements not properly displayed after generation");
+          }
+        }, 300);
+        
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+        
+        // If there's an error, try a different approach
+        try {
+          console.log("Trying alternative QR code generation approach");
+          // Clear again just to be safe
+          qrCodeElement.innerHTML = "";
+          
+          // Create a new instance directly
+          const qrcode = new QRCode(qrCodeElement, {
+            text: controllerUrl,
+            width: 256,
+            height: 256,
+            colorDark: "#FFFFFF",
+            colorLight: "#000000",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          
+          console.log("Alternative QR code generation completed");
+          
+          // Set the timer as before
+          let timeLeft = 45;
+          qrTimerElement.textContent = `QR Code expires in ${timeLeft} seconds`;
+          
+          // Clear existing interval if any
+          if (qrInterval) {
+            clearInterval(qrInterval);
+          }
+          
+          // Set up new interval
+          qrInterval = setInterval(() => {
+            timeLeft--;
+            qrTimerElement.textContent = `QR Code expires in ${timeLeft} seconds`;
+            if (timeLeft <= 0) {
+              clearInterval(qrInterval);
+              // Force a new QR code generation
+              setTimeout(() => {
+                generateTimeBasedQRCode();
+              }, 100);
+            }
+          }, 1000);
+          
+        } catch (backupError) {
+          console.error("Backup QR code generation also failed:", backupError);
+          // Try again after a delay
+          setTimeout(() => {
+            generateTimeBasedQRCode();
+          }, 1000);
+        }
+      }
+    }
+
+    // New function to trigger the turning animation on successful logon
+    function triggerLogonAnimation() {
+      const animationContainer = document.getElementById('logonAnimation');
+      const animationImage = animationContainer.querySelector('img');
+      
+      // Reset any previous animation
+      animationImage.classList.remove('funny-animate');
+      void animationImage.offsetWidth; // Force reflow to restart animation
+      
+      // Show the animation container
+      animationContainer.style.display = 'block';
+      
+      // Start the pulsating animation
+      animationImage.classList.add('funny-animate');
+      
+      // Also start the particle animation with sparkling effect
+      ParticleAnimation.start('particleCanvas');
+    }
+
+    //fix timeout handling for Android 22.02.2025 start//
+    function updateActivityTimestamp() {
+      window.lastActivityTimestamp = Date.now();
+    }
+
+    function startConnectionTimeout() {
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
+
+      connectionTimeout = setTimeout(function() {
+        console.log("No activity for 90 seconds, resetting...");
+        if (isAndroid()) {
+          window.firebaseRTDB.setDisplayContent(displayId, {
+            content: "", // Empty string content
+            lastUpdated: Date.now()
+          }).then(() => {
+            console.log("Successfully reset content via Firebase");
+            resetPage();
+          }).catch((error) => {
+            console.error("Error resetting content:", error);
+            resetPage();
+          });
+        } else {
+          resetPage();
+        }
+      }, 60000);
+
+      if (isAndroid() && !window.androidCheckInterval) {
+        window.androidCheckInterval = setInterval(() => {
+          const now = Date.now();
+          const lastUpdate = window.lastActivityTimestamp || 0;
+          if (now - lastUpdate > 60000) {
+            resetPage();
+          }
+        }, 5000);
+      }
+    }
+    //22.02.2025 end//
+
+    function handleValueChange(data) {
+      console.log("Received Firebase update:", data);
+      var iframe = document.getElementById("mirroredFrame");
+      updateActivityTimestamp();
+      startConnectionTimeout();
+
+      if (data && data.lastUpdated) {
+        const contentToLog = typeof data.content === 'object' 
+          ? JSON.stringify(data.content) 
+          : data.content;
+        console.log("Processing update with content:", contentToLog);
+        
+        if (isConnectionStale(data.lastUpdated)) {
+          resetPage();
+          return;
+        }
+
+        // Clear any existing reset timers
+        if (window.resetTimer) {
+          clearTimeout(window.resetTimer);
+        }
+
+        // Handle different content types
+        switch(data.content) {
+          case "SHOW_LEADERBOARD":
+            console.log("Showing leaderboard as requested by controller");
+            // Stop any ongoing animations or timers
+            clearInterval(timerInterval);
+            ParticleAnimation.stop();
+            
+            // Hide other UI elements
+            document.querySelector(".qr-container").style.display = "none";
+            document.getElementById("mirroredContent").style.display = "none";
+            iframe.style.display = "none";
+            
+            // Show leaderboard
+            toggleLeaderboard(true);
+            
+            // Set timer to hide leaderboard and trigger activity timeout
+            window.resetTimer = setTimeout(() => {
+              console.log("Leaderboard display time finished");
+              toggleLeaderboard(false);
+              
+              // Reset the activity timestamp to force timeout
+              window.lastActivityTimestamp = 0;
+              
+              // Force the connection timeout check
+              if (isAndroid()) {
+                window.firebaseRTDB.setDisplayContent(displayId, {
+                  content: "",
+                  lastUpdated: Date.now()
+                }).then(() => {
+                  console.log("Successfully reset content via Firebase");
+                  resetPage();
+                }).catch((error) => {
+                  console.error("Error resetting content:", error);
+                  resetPage();
+                });
+              } else {
+                resetPage();
+              }
+            }, 20000);
+            break;
+
+          case "LOGIN_SUCCESS":
+            console.log("Controller login successful, showing animation");
+            // Hide QR code and content
+            document.querySelector(".qr-container").style.display = "none";
+            document.getElementById("mirroredContent").style.display = "none";
+            
+            // Show success animation
+            const logonAnimContainer = document.getElementById('logonAnimation');
+            if (logonAnimContainer) {
+              const animImage = logonAnimContainer.querySelector('img');
+              if (animImage) {
+                animImage.classList.remove('funny-animate');
+                void animImage.offsetWidth; // Force reflow
+                animImage.classList.add('funny-animate');
+              }
+              logonAnimContainer.style.display = 'block';
+            }
+            
+            // Start particle animation
+            ParticleAnimation.start('particleCanvas');
+            
+            // Set timer to reset page after 90 seconds if no game completion
+            window.resetTimer = setTimeout(() => {
+              // Only reset if we haven't received a game completion event
+              if (document.getElementById("mirroredContent").textContent !== "Game Completed! Waiting for player data...") {
+                console.log("No game completion detected within timeout, resetting page");
+                resetPage();
+              }
+            }, 90000);
+            break;
+
+          case "GAME1_COMPLETE":
+          case "GAME2_COMPLETE":
+            console.log("Detected game completion, preparing to show success animation");
+            // Clear any existing reset timer
+            if (window.resetTimer) {
+              clearTimeout(window.resetTimer);
+            }
+            
+            // Stop login animations if they're still running
+            const existingAnimImage = document.querySelector('#logonAnimation img');
+            if (existingAnimImage) {
+              existingAnimImage.classList.remove('funny-animate');
+              document.getElementById('logonAnimation').style.display = 'none';
+            }
+            ParticleAnimation.stop();
+            
+            // Show success animation
+            console.log("Game completed, showing success animation while waiting for player data");
+            document.getElementById("mirroredContent").textContent = "Game Completed! Waiting for player data...";
+            document.querySelector(".qr-container").style.display = "none";
+            console.log("Setting iframe src to success.html");
+            iframe.style.display = "block";
+            iframe.src = `/success/success.html?display=${encodeURIComponent(displayId)}&autoclose=true`;
+            console.log("Success animation should be visible now");
+            break;
+
+          case "SHOW_SUCCESS_AND_LEADERBOARD":
+            console.log("Received player data, showing leaderboard");
+            // Update game results if available
+            if (data.playerName && data.playerScore !== undefined && data.playerRounds !== undefined) {
+              let gameResults = JSON.parse(localStorage.getItem('gameResults') || '[]');
+              gameResults.push({ 
+                name: data.playerName, 
+                score: data.playerScore, 
+                rounds: data.playerRounds 
+              });
+              gameResults.sort((a, b) => b.score - a.score);
+              localStorage.setItem('gameResults', JSON.stringify(gameResults));
+            }
+            
+            // Hide other UI elements
+            document.querySelector(".qr-container").style.display = "none";
+            document.getElementById("mirroredContent").style.display = "none";
+            iframe.style.display = "none";
+            
+            // Show leaderboard
+            toggleLeaderboard(true);
+            
+            // Set timer to hide leaderboard and reset page
+            window.resetTimer = setTimeout(() => {
+              toggleLeaderboard(false);
+              setTimeout(resetPage, 500);
+            }, 450000);
+            break;
+
+          // ... rest of your cases ...
+          default:
+            if (data.content) {
+              const displayContent = typeof data.content === 'object' 
+                ? JSON.stringify(data.content) 
+                : data.content;
+              document.getElementById("mirroredContent").textContent = displayContent;
+              iframe.style.display = "none";
+              document.getElementById("mirroredContent").style.display = "block";
+              startTimer(180);
+              document.querySelector(".qr-container").style.display = "none";
+            }
+        }
+      } else {
+        resetPage();
+      }
+    }
+
+    var timerInterval;
+    function startTimer(duration) {
+      var timer = duration;
+      var display = document.getElementById("timer");
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(function() {
+        display.textContent = "Time remaining: " + timer + " seconds";
+        if (--timer < 0) {
+          clearInterval(timerInterval);
+          display.textContent = "Timer finished.";
+          resetPage();
+        }
+      }, 1000);
+    }
+
+    function resetPage() {
+      console.log("Resetting page...");
+      
+      // Clear all timers and intervals
+      if (window.resetTimer) {
+        clearTimeout(window.resetTimer);
+      }
+      clearTimeout(connectionTimeout);
+      clearInterval(timerInterval);
+      clearInterval(qrInterval);
+      if (window.androidCheckInterval) {
+        clearInterval(window.androidCheckInterval);
+        window.androidCheckInterval = null;
+      }
+      
+      // Hide leaderboard if it's showing
+      const leaderboard = document.getElementById('leaderboard');
+      if (leaderboard && leaderboard.style.display !== 'none') {
+        toggleLeaderboard(false);
+      }
+      
+      // Stop any animations
+      const animationElement = document.querySelector('#logonAnimation img');
+      if (animationElement) {
+        animationElement.classList.remove('funny-animate');
+        document.getElementById('logonAnimation').style.display = 'none';
+      }
+      
+      // Stop particle animation
+      ParticleAnimation.stop();
+      
+      // Reset the display content
+      document.getElementById("mirroredContent").textContent = "scan and collect";
+      document.getElementById("mirroredContent").style.display = "block";
+      document.getElementById("timer").textContent = "";
+      
+      // Reset iframe
+      const iframe = document.getElementById("mirroredFrame");
+      iframe.style.display = "none";
+      iframe.className = "";
+      
+      // Reset activity tracker
+      window.lastActivityTimestamp = null;
+      
+      // First, completely remove the existing QR code element
+      const existingQRElement = document.getElementById("qrCode");
+      if (existingQRElement && existingQRElement.parentNode) {
+        existingQRElement.parentNode.removeChild(existingQRElement);
+        console.log("Removed existing QR code element during reset");
+      }
+      
+      // Clean up any orphaned frames or elements that might be left behind
+      const qrContainer = document.querySelector(".qr-container");
+      if (qrContainer) {
+        // Remove any iframe/canvas elements that might be creating the unwanted frame
+        // But preserve game images
+        const orphanedElements = qrContainer.querySelectorAll("iframe, canvas, img:not(#qrCode img):not(.game-images img)");
+        orphanedElements.forEach(element => {
+          if (!element.closest('.game-images')) {
+            element.parentNode.removeChild(element);
+            console.log("Removed orphaned element during reset:", element.tagName);
+          }
+        });
+        
+        // Ensure container is visible and properly styled
+        qrContainer.style.display = "block";
+        qrContainer.style.visibility = "visible";
+        qrContainer.style.opacity = "1";
+      }
+      
+      // Create a new QR code element
+      const newQRElement = document.createElement("div");
+      newQRElement.id = "qrCode";
+      newQRElement.style.cssText = "display: block; text-align: center; width: 256px; height: 256px;";
+      
+      // Add to container
+      if (qrContainer) {
+        qrContainer.appendChild(newQRElement);
+        console.log("Created new QR code element during reset");
+        // Update global reference
+        qrCodeElement = newQRElement;
+      } else {
+        console.error("QR container not found during reset");
+      }
+      
+      // Generate a new QR code with a slight delay
+      setTimeout(() => {
+        generateTimeBasedQRCode();
+        
+        // Verify QR code was generated properly after a delay
+        setTimeout(() => {
+          if (isQRCodeVisible()) {
+            console.log("QR code successfully regenerated during reset");
+          } else {
+            console.log("QR code not visible after reset, attempting fix...");
+            fixQRCodeVisibility();
+          }
+        }, 500);
+      }, 100);
+      
+      // Reset Firebase data
+      console.log("Resetting Firebase data...");
+      window.firebaseRTDB.setDisplayContent(displayId, null)
+        .then(() => {
+          console.log("Firebase data reset successfully");
+        })
+        .catch(error => {
+          console.error("Error resetting Firebase data:", error);
+        });
+    }
+
+    // Add function to check if QR code is visible
+    function isQRCodeVisible() {
+      const qrElement = document.getElementById("qrCode");
+      if (!qrElement) return false;
+      
+      const qrImage = qrElement.querySelector("img");
+      const qrCanvas = qrElement.querySelector("canvas");
+      
+      // Check if either an image or canvas exists
+      const hasQrElements = (qrImage !== null) || (qrCanvas !== null);
+      if (!hasQrElements) return false;
+      
+      // Check if the QR container is visible
+      const qrContainer = document.querySelector(".qr-container");
+      if (!qrContainer || getComputedStyle(qrContainer).display === "none") return false;
+      
+      // Check basic visibility of QR code element itself
+      if (getComputedStyle(qrElement).display === "none") return false;
+      
+      // Check if QR has content (alternative to checking if visible)
+      if (qrElement.innerHTML.trim() === "") return false;
+      
+      // If we have an image, just check if it has dimensions rather than computed visibility
+      if (qrImage) {
+        return qrImage.width > 0 && qrImage.height > 0;
+      }
+      
+      // If we have a canvas, just check if it has dimensions
+      if (qrCanvas) {
+        return qrCanvas.width > 0 && qrCanvas.height > 0;
+      }
+      
+      // All checks passed, QR code should be visible
+      return true;
+    }
+    
+    // Add function to fix QR code visibility issues
+    function fixQRCodeVisibility() {
+      console.log("Attempting to fix QR code visibility...");
+      
+      // First ensure container is visible
+      const qrContainer = document.querySelector(".qr-container");
+      if (qrContainer) {
+        qrContainer.style.display = "block";
+        qrContainer.style.visibility = "visible";
+        qrContainer.style.opacity = "1";
+      }
+      
+      // Get existing QR code element
+      let qrCodeElement = document.getElementById("qrCode");
+      
+      // Check if we need to completely recreate the QR code
+      if (!qrCodeElement || !isQRCodeVisible()) {
+        console.log("QR code not properly visible, recreating...");
+        
+        // If element exists, remove it
+        if (qrCodeElement && qrCodeElement.parentNode) {
+          qrCodeElement.parentNode.removeChild(qrCodeElement);
+          console.log("Removed existing QR code element");
+        }
+        
+        // Create new element
+        qrCodeElement = document.createElement("div");
+        qrCodeElement.id = "qrCode";
+        qrCodeElement.style.cssText = "display: block; text-align: center; width: 256px; height: 256px;";
+        
+        // Add to container
+        if (qrContainer) {
+          qrContainer.appendChild(qrCodeElement);
+          console.log("Created new QR code element");
+        } else {
+          console.error("Cannot create QR code - container not found");
+          return false;
+        }
+        
+        // Update global reference
+        window.qrCodeElement = qrCodeElement;
+        
+        // Generate new QR code
+        setTimeout(() => {
+          generateTimeBasedQRCode();
+          
+          // Verify after generation
+          setTimeout(() => {
+            if (isQRCodeVisible()) {
+              console.log("QR code visibility fixed successfully");
+              return true;
+            } else {
+              console.error("QR code still not visible after fix attempt");
+              return false;
+            }
+          }, 500);
+        }, 100);
+      } else {
+        // QR code exists but might need style fixes
+        console.log("QR code element exists, applying style fixes");
+        
+        // Apply styles to ensure visibility
+        qrCodeElement.style.display = "block";
+        
+        // Fix child elements
+        const img = qrCodeElement.querySelector("img");
+        if (img) {
+          img.style.display = "block";
+          img.style.margin = "0 auto";
+          img.style.width = "256px";
+          img.style.height = "256px";
+        }
+        
+        const canvas = qrCodeElement.querySelector("canvas");
+        if (canvas) {
+          canvas.style.display = "block";
+          canvas.style.margin = "0 auto";
+          canvas.style.width = "256px";
+          canvas.style.height = "256px";
+        }
+        
+        // If we have an image or canvas, we're good
+        if (img || canvas) {
+          console.log("Applied style fixes to existing QR code elements");
+          return true;
+        } else {
+          // No image or canvas found, need to generate QR code
+          console.log("QR code element exists but has no content, generating new QR code");
+          setTimeout(generateTimeBasedQRCode, 100);
+          return true;
+        }
+      }
+    }
+
+    // Function to generate a unique display ID
+    function generateDisplayId() {
+      // Create a random string of 10 characters
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < 10; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      console.log("Generated new display ID:", result);
+      return 'display_' + result;
+    }
+
+    // Function to generate a QR code
+    function generateQRCode() {
+      console.log("Generating QR code...");
+      
+      try {
+        // Get or create display ID
+        const urlParams = new URLSearchParams(window.location.search);
+        let displayId = urlParams.get('id');
+        
+        if (!displayId) {
+          displayId = generateDisplayId();
+          // Update URL with the new display ID
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.set('id', displayId);
+          window.history.replaceState({}, '', newUrl);
+        }
+        
+        // Store display ID in a global variable
+        window.displayId = displayId;
+        
+        // Find QR code element
+        const qrCodeElement = document.getElementById('qrCode');
+        if (qrCodeElement) {
+          console.log("QR code element found for manual generation");
+          
+          // Generate QR code for controller URL
+          const controllerUrl = `${window.location.origin}/controller.html?id=${displayId}`;
+          
+          // Set QR container to visible
+          const qrContainer = document.getElementById('qrContainer');
+          if (qrContainer) {
+            qrContainer.style.display = 'flex';
+            console.log("QR container set to visible in manual generation");
+          }
+          
+          // Generate QR code
+          new QRCode(qrCodeElement, {
+            text: controllerUrl,
+            width: 256,
+            height: 256,
+            colorDark: "#00BFFF",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          
+          return true;
+        } else {
+          console.error("QR code element not found for manual generation");
+          return false;
+        }
+      } catch (error) {
+        console.error("Error in manual QR code generation:", error);
+        return false;
+      }
+    }
+
+    // Direct implementation of authenticateDisplayService as a fallback
+    async function authenticateDisplayServiceFallback(displayId) {
+      console.log("Using fallback authentication for display:", displayId);
+      
+      try {
+        // Try to use an existing auth method if available
+        if (firebase && firebase.auth) {
+          // Check if we're already authenticated
+          if (firebase.auth().currentUser) {
+            console.log("Already authenticated as:", firebase.auth().currentUser.uid);
+            return firebase.auth().currentUser;
+          }
+          
+          // Try email/password authentication with a predefined display account
+          try {
+            console.log("Attempting to sign in with display account");
+            // Use a predefined email/password for the display
+            // This is more secure than anonymous auth and can be restricted by IP
+            const email = `display-${displayId}@simplix-display.local`;
+            const password = `Display-${displayId}-${window.location.hostname.replace(/[^a-zA-Z0-9]/g, '')}`;
+            
+            try {
+              // Try to sign in first
+              const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+              console.log("Display account sign-in successful:", userCredential.user.uid);
+              return userCredential.user;
+            } catch (signInError) {
+              // If sign-in fails, try to create the account
+              if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/email-not-found') {
+                console.log("Display account not found, creating new account");
+                try {
+                  const newUserCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                  console.log("Display account creation successful:", newUserCredential.user.uid);
+                  
+                  // Update profile with display name
+                  try {
+                    await firebase.auth().currentUser.updateProfile({
+                      displayName: `Display_${displayId}`
+                    });
+                  } catch (profileError) {
+                    console.warn("Could not update display profile:", profileError);
+                  }
+                  
+                  return newUserCredential.user;
+                } catch (createError) {
+                  console.error("Failed to create display account:", createError);
+                  
+                  // If account creation fails due to admin restrictions, try a final approach
+                  if (createError.code === 'auth/admin-restricted-operation' || 
+                      createError.code === 'auth/operation-not-allowed') {
+                    console.log("Account creation restricted, trying direct database access");
+                    throw createError;
+                  } else {
+                    throw createError;
+                  }
+                }
+              } else {
+                console.error("Display account sign-in failed:", signInError);
+                throw signInError;
+              }
+            }
+          } catch (emailAuthError) {
+            console.error("Email authentication failed:", emailAuthError);
+            
+            // If email auth fails, try direct database access without authentication
+            console.log("Attempting to use direct database access");
+            throw emailAuthError;
+          }
+        } else {
+          throw new Error("Firebase auth not available for fallback authentication");
+        }
+      } catch (error) {
+        console.error("Fallback authentication error:", error);
+        throw error;
+      }
+    }
+
+    // Direct database access as a last resort
+    function setupDirectDatabaseAccess(displayId) {
+      console.log("Setting up direct database access for:", displayId);
+      
+      // Create a wrapper for direct database access
+      window.directDBAccess = {
+        setDisplayContent: function(displayId, content) {
+          console.log("Using direct database access to set content");
+          
+          // Create a reference to the Firebase database
+          const dbRef = firebase.database().ref(`displays/${displayId}`);
+          
+          // Set the content
+          return dbRef.set({
+            content: content,
+            lastUpdated: firebase.database.ServerValue.TIMESTAMP
+          }).then(() => {
+            console.log("Content set successfully via direct access");
+            return true;
+          }).catch(error => {
+            console.error("Error setting content via direct access:", error);
+            throw error;
+          });
+        },
+        
+        listenToDisplay: function(displayId, callback) {
+          console.log("Setting up direct database listener");
+          
+          // Create a reference to the Firebase database
+          const dbRef = firebase.database().ref(`displays/${displayId}`);
+          
+          // Set up the listener
+          return dbRef.on('value', (snapshot) => {
+            callback(snapshot.val());
+          }, (error) => {
+            console.error("Error in direct database listener:", error);
+          });
+        }
+      };
+      
+      return window.directDBAccess;
+    }
+
+    async function initializeApp() {
+      console.log("Initializing application...");
+      
+      try {
+        // Get display ID from URL or generate a new one
+        const urlParams = new URLSearchParams(window.location.search);
+        let displayId = urlParams.get('id');
+        
+        if (!displayId) {
+          displayId = generateDisplayId();
+          // Update URL with the new display ID
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.set('id', displayId);
+          window.history.replaceState({}, '', newUrl);
+        }
+        
+        // Store display ID in a global variable
+        window.displayId = displayId;
+        
+        // Generate the time-based QR code
+        generateTimeBasedQRCode();
+        
+        // Authenticate and set up database access
+        console.log("Setting up Firebase access...");
+        let dbAccessMethod = null;
+        
+        // Try each method in sequence until one works
+        
+        // Method 1: Try module import with dynamic import
+        try {
+          console.log("Attempting module import method...");
+          // Use dynamic import with explicit path
+          const module = await import('/js/firebase-services.js');
+          
+          // Check if the module has the authenticateDisplayService function
+          if (typeof module.authenticateDisplayService === 'function') {
+            console.log("Found authenticateDisplayService in module");
+            
+            // Try to authenticate
+            await module.authenticateDisplayService(displayId);
+            console.log("Module authentication successful");
+            
+            // Use the module's RTDB functions
+            dbAccessMethod = window.firebaseRTDB;
+          } else {
+            console.error("authenticateDisplayService not found in module");
+            throw new Error("authenticateDisplayService not found in module");
+          }
+        } catch (moduleError) {
+          console.error("Module method failed:", moduleError);
+          
+          // Method 2: Try fallback authentication
+          try {
+            console.log("Attempting fallback authentication...");
+            await authenticateDisplayServiceFallback(displayId);
+            console.log("Fallback authentication successful");
+            
+            // Use the module's RTDB functions if available, otherwise use direct access
+            dbAccessMethod = window.firebaseRTDB || setupDirectDatabaseAccess(displayId);
+          } catch (fallbackError) {
+            console.error("Fallback authentication failed:", fallbackError);
+            
+            // Method 3: Last resort - try direct database access without authentication
+            console.log("Attempting direct database access without authentication...");
+            dbAccessMethod = setupDirectDatabaseAccess(displayId);
+          }
+        }
+        
+        // Now use whatever database access method we have
+        if (dbAccessMethod) {
+          console.log("Using database access method:", dbAccessMethod === window.firebaseRTDB ? "Module RTDB" : "Direct Access");
+          
+          // Clear existing data
+          console.log("Clearing Firebase data...");
+          try {
+            await dbAccessMethod.setDisplayContent(displayId, null);
+            console.log("Firebase data cleared successfully");
+            
+            // Set up listener
+            console.log("Setting up display listener...");
+            dbAccessMethod.listenToDisplay(displayId, handleValueChange);
+          } catch (dbError) {
+            console.error("Error accessing database:", dbError);
+          }
+        } else {
+          console.error("No database access method available");
+        }
+        
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+        // Try to generate QR code even if Firebase fails
+        generateTimeBasedQRCode();
+      }
+    }
+
+    function placeholderLeaderboard() {
+      // Use our new showLeaderboard function
+      showLeaderboard();
+    }
+
+    // Add this function to show success messages
+    function showSuccessMessage(message, duration = 10000) {
+      // Remove any existing success message
+      const existingMessage = document.getElementById('success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+      
+      // Create new success message
+      const successMessage = document.createElement('div');
+      successMessage.id = 'success-message';
+      successMessage.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(0, 191, 255, 0.8);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.5s ease-in-out;
+        max-width: 300px;
+      `;
+      
+      // Create a styled message container
+      const messageContainer = document.createElement('div');
+      messageContainer.style.cssText = `
+        text-align: center;
+      `;
+      
+      // Add message text
+      const messageText = document.createElement('div');
+      messageText.textContent = message;
+      messageText.style.cssText = `
+        font-weight: bold;
+        margin-bottom: 10px;
+      `;
+      
+      // Add profile manager button
+      const profileButton = document.createElement('button');
+      profileButton.textContent = 'Manage Profile';
+      profileButton.style.cssText = `
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 10px;
+        width: 100%;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      `;
+      profileButton.addEventListener('mouseover', () => {
+        profileButton.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+      });
+      profileButton.addEventListener('mouseout', () => {
+        profileButton.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+      });
+      profileButton.addEventListener('click', () => {
+        if (typeof window.createProfileManager === 'function') {
+          import('./js/firebase-services.js').then(module => {
+            const currentUser = module.auth.currentUser;
+            if (currentUser) {
+              window.createProfileManager(currentUser);
+            } else {
+              console.error("No authenticated user available");
+            }
+          }).catch(error => {
+            console.error("Error importing firebase services:", error);
+          });
+        } else {
+          console.error("createProfileManager function not found");
+        }
+      });
+      
+      // Add close button
+      const closeButton = document.createElement('button');
+      closeButton.textContent = '×';
+      closeButton.style.cssText = `
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+      `;
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(successMessage);
+      });
+      
+      // Assemble the message
+      messageContainer.appendChild(messageText);
+      messageContainer.appendChild(profileButton);
+      successMessage.appendChild(messageContainer);
+      successMessage.appendChild(closeButton);
+      document.body.appendChild(successMessage);
+      
+      // Auto-hide after specified duration
+      setTimeout(() => {
+        if (document.body.contains(successMessage)) {
+          successMessage.style.opacity = '0';
+          successMessage.style.transition = 'opacity 0.5s ease-in-out';
+          setTimeout(() => {
+            if (document.body.contains(successMessage)) {
+              document.body.removeChild(successMessage);
+            }
+          }, 500);
+        }
+      }, duration);
+      
+      return successMessage;
+    }
+    
+    // Make the function available globally
+    window.showSuccessMessage = showSuccessMessage;
+  </script>
+
+  <!-- Add this script at the beginning of your index.html -->
+  <script type="module">
+    // Import necessary functions
+    import { checkRedirectResult } from './js/firebase-services.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { auth } from './js/firebase-services.js';
+    
+    // Check for redirect result when the page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // First check for any redirect result
+        const redirectUser = await checkRedirectResult();
+        if (redirectUser) {
+          console.log("User signed in via redirect:", redirectUser.displayName);
+          // Show success message
+          if (typeof showSuccessMessage === 'function') {
+            showSuccessMessage(`Welcome, ${redirectUser.displayName}!`);
+          }
+        }
+        
+        // Also listen for auth state changes
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            console.log("User is signed in:", user.displayName);
+          } else {
+            console.log("User is signed out");
+          }
+        });
+      } catch (error) {
+        console.error("Error during authentication check:", error);
+      }
+    });
+    
+    // Optional: Standardize on one domain
+    if (window.location.hostname === 'simplixgymrewards.firebaseapp.com') {
+      // Redirect to web.app domain for consistency
+      window.location.replace('https://simplixgymrewards.web.app' + 
+        window.location.pathname + window.location.search + window.location.hash);
+    }
+  </script>
+
+  <!-- Add this script to your index.html for profile management -->
+  <script type="module">
+    import { auth, onAuthStateChanged, db, doc, getDoc, updateDoc, collection, query, where, getDocs, limit } from './js/firebase-services.js';
+    
+    // Create a profile management modal
+    const createProfileManager = async (user) => {
+      if (!user || !user.uid) {
+        console.error("No authenticated user available");
+        alert("You must be logged in to manage your profile");
+        return;
+      }
+      
+      // Remove any existing profile manager
+      const existingModal = document.getElementById('profile-manager-modal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+      
+      // Get current user profile
+      let userProfile = null;
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          userProfile = userDoc.data();
+        } else {
+          console.log("No existing profile found, will create new one");
+        }
+      } catch (error) {
+        console.error("Error getting user profile:", error);
+      }
+      
+      // Get gym locations
+      let gymLocations = [];
+      try {
+        const gymsSnapshot = await getDocs(collection(db, 'gyms'));
+        gymLocations = gymsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name || doc.id
+        }));
+      } catch (error) {
+        console.error("Error getting gym locations:", error);
+      }
+      
+      // Create modal container
+      const modalContainer = document.createElement('div');
+      modalContainer.id = 'profile-manager-modal';
+      modalContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      
+      // Create modal content
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background-color: #111;
+        padding: 30px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 0 20px #00BFFF;
+        position: relative;
+      `;
+      
+      // Close button
+      const closeButton = document.createElement('button');
+      closeButton.textContent = '×';
+      closeButton.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        margin: 0;
+      `;
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(modalContainer);
+      });
+      
+      // Title
+      const title = document.createElement('h2');
+      title.textContent = 'Profile Settings';
+      title.style.cssText = `
+        color: #00BFFF;
+        margin-bottom: 20px;
+        text-align: center;
+      `;
+      
+      // Create form
+      const form = document.createElement('form');
+      form.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      `;
+      
+      // Username field
+      const usernameLabel = document.createElement('label');
+      usernameLabel.textContent = 'Nickname / Username:';
+      usernameLabel.style.color = '#fff';
+      
+      const usernameInput = document.createElement('input');
+      usernameInput.type = 'text';
+      usernameInput.value = userProfile?.name || user.displayName || '';
+      usernameInput.style.cssText = `
+        padding: 10px;
+        background-color: #222;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 5px;
+      `;
+      
+      const usernameContainer = document.createElement('div');
+      usernameContainer.appendChild(usernameLabel);
+      usernameContainer.appendChild(usernameInput);
+      
+      // Gym selection
+      const gymLabel = document.createElement('label');
+      gymLabel.textContent = 'Gym Location:';
+      gymLabel.style.color = '#fff';
+      
+      const gymSelect = document.createElement('select');
+      gymSelect.style.cssText = `
+        padding: 10px;
+        background-color: #222;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 5px;
+      `;
+      
+      // Add gym options
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = '-- Select a gym --';
+      gymSelect.appendChild(defaultOption);
+      
+      // Add manual option
+      const manualOption = document.createElement('option');
+      manualOption.value = 'manual';
+      manualOption.textContent = 'Enter manually';
+      gymSelect.appendChild(manualOption);
+      
+      // Add gym locations from database
+      gymLocations.forEach(gym => {
+        const option = document.createElement('option');
+        option.value = gym.id;
+        option.textContent = gym.name;
+        gymSelect.appendChild(option);
+      });
+      
+      // Set current gym if available
+      if (userProfile?.gymId) {
+        // Check if the gym exists in the options
+        let gymExists = false;
+        for (let i = 0; i < gymSelect.options.length; i++) {
+          if (gymSelect.options[i].value === userProfile.gymId) {
+            gymSelect.value = userProfile.gymId;
+            gymExists = true;
+            break;
+          }
+        }
+        
+        // If not found, select manual option
+        if (!gymExists) {
+          gymSelect.value = 'manual';
+        }
+      }
+      
+      // Manual gym input
+      const manualGymContainer = document.createElement('div');
+      manualGymContainer.style.display = gymSelect.value === 'manual' ? 'block' : 'none';
+      
+      const manualGymInput = document.createElement('input');
+      manualGymInput.type = 'text';
+      manualGymInput.placeholder = 'Enter gym ID';
+      manualGymInput.value = userProfile?.gymId || '';
+      manualGymInput.style.cssText = `
+        padding: 10px;
+        background-color: #222;
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 5px;
+        margin-top: 10px;
+        width: 100%;
+      `;
+      
+      manualGymContainer.appendChild(manualGymInput);
+      
+      // Show/hide manual input based on selection
+      gymSelect.addEventListener('change', () => {
+        manualGymContainer.style.display = gymSelect.value === 'manual' ? 'block' : 'none';
+      });
+      
+      const gymContainer = document.createElement('div');
+      gymContainer.appendChild(gymLabel);
+      gymContainer.appendChild(gymSelect);
+      gymContainer.appendChild(manualGymContainer);
+      
+      // Status message
+      const statusMessage = document.createElement('div');
+      statusMessage.style.cssText = `
+        padding: 10px;
+        border-radius: 5px;
+        text-align: center;
+        margin-top: 10px;
+        display: none;
+      `;
+
+      // Submit button
+      const submitButton = document.createElement('button');
+      submitButton.type = 'submit';
+      submitButton.textContent = 'Save Changes';
+      submitButton.style.cssText = `
+        padding: 12px;
+        background-color: #00BFFF;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+      `;
+
+      // Logout button
+      const logoutButton = document.createElement('button');
+      logoutButton.type = 'button'; // Important: type="button" prevents form submission
+      logoutButton.textContent = 'Logout';
+      logoutButton.style.cssText = `
+        padding: 12px;
+        background-color: #FF6B6B;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+      `;
+      
+      // Logout button click handler
+      logoutButton.addEventListener('click', async () => {
+        try {
+          // Import the signOut function
+          const { auth, signOut } = await import('./js/firebase-services.js');
+          
+          // Sign out
+          await signOut(auth);
+          
+          // Show success message
+          statusMessage.textContent = 'Logged out successfully!';
+          statusMessage.style.backgroundColor = '#4CAF50';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+          
+          // Close modal after a short delay
+          setTimeout(() => {
+            if (document.body.contains(modalContainer)) {
+              document.body.removeChild(modalContainer);
+              
+              // Show success message
+              showSuccessMessage('Logged out successfully!');
+            }
+          }, 1500);
+          
+          // Remove welcome message if visible
+          const welcomeMessage = document.getElementById('welcome-message');
+          if (welcomeMessage && document.body.contains(welcomeMessage)) {
+            document.body.removeChild(welcomeMessage);
+          }
+          
+          console.log("User logged out");
+        } catch (error) {
+          console.error("Error signing out:", error);
+          
+          // Show error
+          statusMessage.textContent = `Error: ${error.message}`;
+          statusMessage.style.backgroundColor = '#FF6B6B';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+        }
+      });
+      
+      // Add form elements to form
+      form.appendChild(usernameContainer);
+      form.appendChild(gymContainer);
+      form.appendChild(statusMessage);
+      form.appendChild(submitButton);
+      form.appendChild(logoutButton);
+      
+      // Form submission handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Disable button and show loading state
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving...';
+        
+        // Get values
+        const newUsername = usernameInput.value.trim();
+        let newGymId = gymSelect.value;
+        
+        if (newGymId === 'manual') {
+          newGymId = manualGymInput.value.trim();
+        }
+        
+        // Validate
+        if (!newUsername) {
+          statusMessage.textContent = 'Please enter a username';
+          statusMessage.style.backgroundColor = '#FF6B6B';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+          submitButton.disabled = false;
+          submitButton.textContent = 'Save Changes';
+          return;
+        }
+        
+        if (!newGymId) {
+          statusMessage.textContent = 'Please select or enter a gym';
+          statusMessage.style.backgroundColor = '#FF6B6B';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+          submitButton.disabled = false;
+          submitButton.textContent = 'Save Changes';
+          return;
+        }
+        
+        try {
+          // Import necessary Firebase functions
+          const module = await import('./js/firebase-services.js');
+          const { db, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, limit } = module;
+          
+          // Check if username is taken (if changed)
+          if (newUsername !== userProfile?.name) {
+            const usernameQuery = query(
+              collection(db, 'users'),
+              where('name', '==', newUsername),
+              limit(1)
+            );
+            
+            const usernameSnapshot = await getDocs(usernameQuery);
+            
+            if (!usernameSnapshot.empty) {
+              const existingUser = usernameSnapshot.docs[0];
+              if (existingUser.id !== user.uid) {
+                // Username taken by another user
+                statusMessage.textContent = 'Username already taken';
+                statusMessage.style.backgroundColor = '#FF6B6B';
+                statusMessage.style.color = 'white';
+                statusMessage.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Changes';
+                return;
+              }
+            }
+          }
+          
+          // Get reference to user document
+          const userRef = doc(db, 'users', user.uid);
+          
+          // Check if user document exists
+          const userDoc = await getDoc(userRef);
+          
+          // Prepare profile data
+          const profileData = {
+            name: newUsername,
+            gymId: newGymId,
+            email: user.email || (userDoc.exists() ? userDoc.data().email : ''), // Ensure email is always included
+            lastUpdated: new Date().toISOString()
+          };
+          
+          console.log("Updating profile with data:", profileData);
+          
+          // If document doesn't exist, create it with setDoc
+          // If it exists, update it with updateDoc
+          if (!userDoc.exists()) {
+            // Create new document with all fields
+            await setDoc(userRef, {
+              ...profileData,
+              createdAt: new Date().toISOString(),
+              uid: user.uid,
+              points: 0
+            });
+          } else {
+            // Update existing document
+            await updateDoc(userRef, profileData);
+          }
+          
+          // Show success
+          statusMessage.textContent = 'Profile updated successfully!';
+          statusMessage.style.backgroundColor = '#4CAF50';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+          
+          // Update welcome message if visible
+          const welcomeMessage = document.getElementById('welcome-message');
+          if (welcomeMessage) {
+            const nameElement = welcomeMessage.querySelector('div:first-child');
+            if (nameElement) {
+              nameElement.textContent = `Hi ${newUsername}!`;
+            }
+          }
+          
+          // Reset button
+          submitButton.disabled = false;
+          submitButton.textContent = 'Save Changes';
+          
+          // Auto close after success
+          setTimeout(() => {
+            if (document.body.contains(modalContainer)) {
+              document.body.removeChild(modalContainer);
+              
+              // Show success message with profile manager button
+              showSuccessMessage(`Profile updated successfully! Your nickname is now ${newUsername}.`);
+            }
+          }, 1500);
+        } catch (error) {
+          console.error("Error updating profile:", error);
+          
+          // Show error with more details
+          let errorMessage = error.message;
+          
+          // Check for specific Firebase errors
+          if (error.code === 'permission-denied') {
+            errorMessage = 'Missing or insufficient permissions. Please try again later.';
+            console.log("Permission denied error. User ID:", user.uid, "Email:", user.email);
+            console.log("Attempted to update with data:", {
+              name: newUsername,
+              gymId: newGymId,
+              email: user.email
+            });
+          }
+          
+          // Add more specific error handling for common Firestore errors
+          if (error.code === 'unavailable') {
+            errorMessage = 'Database is currently unavailable. Please try again later.';
+          }
+          
+          if (error.code === 'resource-exhausted') {
+            errorMessage = 'Too many requests. Please try again later.';
+          }
+          
+          statusMessage.textContent = `Error: ${errorMessage}`;
+          statusMessage.style.backgroundColor = '#FF6B6B';
+          statusMessage.style.color = 'white';
+          statusMessage.style.display = 'block';
+          
+          // Reset button state
+          submitButton.disabled = false;
+          submitButton.textContent = 'Save Changes';
+        }
+      });
+      
+      // Add form to modal content
+      modalContent.appendChild(title);
+      modalContent.appendChild(form);
+      
+      // Assemble the modal
+      modalContent.appendChild(closeButton);
+      modalContainer.appendChild(modalContent);
+      document.body.appendChild(modalContainer);
+    }
+    
+    // IMPORTANT: Make createProfileManager available globally
+    window.createProfileManager = createProfileManager;
+    
+    // Export the function for module imports
+    export { createProfileManager };
+  </script>
+
+  <!-- Füge dieses Script am Ende des <body> Tags ein -->
+  <script>
+    // Finde den Login-Button und füge Event-Listener hinzu
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginButton = document.getElementById('loginButton'); // Passe die ID an deine Button-ID an
+      
+      if (loginButton) {
+        loginButton.addEventListener('click', handleLoginButtonClick);
+      }
+    });
+    
+    // New function to handle login button click
+    async function handleLoginButtonClick() {
+      // Check if user is already logged in
+      if (firebase.auth().currentUser) {
+        // User is logged in, show profile management
+        try {
+          // Import the module to get createProfileManager function
+          const module = await import('./js/firebase-services.js');
+          // Make the function available globally if it's not already
+          window.createProfileManager = window.createProfileManager || module.createProfileManager;
+          
+          // Call the profile manager with the current user
+          if (typeof window.createProfileManager === 'function') {
+            window.createProfileManager(firebase.auth().currentUser);
+          } else {
+            console.error("createProfileManager function not available");
+            alert("Profile management is not available at the moment. Please try again later.");
+          }
+        } catch (error) {
+          console.error("Error showing profile manager:", error);
+          alert("Could not load profile management. Please try again later.");
+        }
+      } else {
+        // User is not logged in, show auth UI with modified callback
+        showFirebaseAuthUI();
+      }
+    }
+    
+    function showFirebaseAuthUI() {
+      // Erstelle das Modal für FirebaseUI
+      const modalContainer = document.createElement('div');
+      modalContainer.id = 'login-modal';
+      modalContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      `;
+      
+      // Erstelle Modal-Inhalt
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `
+        background-color: #1a1a1a;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+        position: relative;
+      `;
+      
+      // Schließen-Button
+      const closeButton = document.createElement('button');
+      closeButton.innerHTML = '×';
+      closeButton.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+      `;
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(modalContainer);
+      });
+      modalContent.appendChild(closeButton);
+      
+      // Titel
+      const title = document.createElement('h2');
+      title.textContent = 'Login / Sign Up';
+      title.style.cssText = `
+        color: #00BFFF;
+        margin-bottom: 20px;
+        text-align: center;
+      `;
+      modalContent.appendChild(title);
+      
+      // Container für FirebaseUI
+      const firebaseUIContainer = document.createElement('div');
+      firebaseUIContainer.id = 'firebaseui-auth-container';
+      modalContent.appendChild(firebaseUIContainer);
+      
+      // Lade-Indikator
+      const loader = document.createElement('div');
+      loader.id = 'loader';
+      loader.textContent = 'Loading...';
+      loader.style.cssText = `
+        text-align: center;
+        color: #00BFFF;
+        margin-top: 20px;
+      `;
+      modalContent.appendChild(loader);
+      
+      // Füge Modal zum Body hinzu
+      modalContainer.appendChild(modalContent);
+      document.body.appendChild(modalContainer);
+      
+      // Initialisiere Firebase
+      if (!window.firebase || !firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+          authDomain: window.location.hostname.includes('web.app') 
+            ? "simplixgymrewards.web.app" 
+            : "simplixgymrewards.firebaseapp.com",
+          databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "simplixgymrewards",
+          storageBucket: "simplixgymrewards.firebasestorage.app",
+          messagingSenderId: "821049711023",
+          appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+        });
+      }
+      
+      // FirebaseUI Konfiguration
+      const uiConfig = {
+        signInSuccessUrl: window.location.href,
+        signInOptions: [
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          firebase.auth.EmailAuthProvider.PROVIDER_ID
+        ],
+        tosUrl: 'https://www.simplix.solutions/impressum',
+        privacyPolicyUrl: 'https://www.simplix.solutions/datenschutz-website',
+        callbacks: {
+          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+            // Benutzer erfolgreich angemeldet
+            const user = authResult.user;
+            console.log("User successfully signed in:", user.displayName);
+            
+            // Modal schließen
+            document.body.removeChild(modalContainer);
+            
+            // Speichere Benutzerprofil im localStorage
+            const profile = {
+              uid: user.uid,
+              name: user.displayName || user.email.split('@')[0],
+              email: user.email,
+              photoURL: user.photoURL
+            };
+            
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            
+            // Show profile management dialog immediately after login
+            setTimeout(async () => {
+              try {
+                // Import the module to get createProfileManager function
+                const module = await import('./js/firebase-services.js');
+                // Make the function available globally if it's not already
+                window.createProfileManager = window.createProfileManager || module.createProfileManager;
+                
+                // Call the profile manager with the current user
+                if (typeof window.createProfileManager === 'function') {
+                  window.createProfileManager(user);
+                } else {
+                  console.error("createProfileManager function not available");
+                }
+              } catch (error) {
+                console.error("Error showing profile manager after login:", error);
+              }
+            }, 500); // Short delay to ensure auth state is fully updated
+            
+            // Weiterleitung verhindern
+            return false;
+          }
+        },
+        signInFlow: 'popup'
+      };
+      
+      // FirebaseUI Widget initialisieren
+      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start('#firebaseui-auth-container', uiConfig);
+      
+      // Lade-Indikator ausblenden, wenn UI geladen ist
+      setTimeout(() => {
+        const loader = document.getElementById('loader');
+        if (loader) {
+          loader.style.display = 'none';
+        }
+      }, 1000);
+    }
+    
+    // Prüfe, ob Benutzer bereits angemeldet ist
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialisiere Firebase, falls noch nicht geschehen
+      if (!window.firebase || !firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+          authDomain: window.location.hostname.includes('web.app') 
+            ? "simplixgymrewards.web.app" 
+            : "simplixgymrewards.firebaseapp.com",
+          databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "simplixgymrewards",
+          storageBucket: "simplixgymrewards.firebasestorage.app",
+          messagingSenderId: "821049711023",
+          appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+        });
+      }
+      
+      // Auf Authentifizierungsänderungen hören
+      firebase.auth().onAuthStateChanged(function(user) {
+        const loginButton = document.getElementById('loginButton'); // Passe die ID an deine Button-ID an
+        
+        if (user) {
+          // Benutzer ist angemeldet
+          console.log("User is signed in:", user.displayName || user.email);
+          
+          // Optional: Login-Button-Text ändern
+          if (loginButton) {
+            loginButton.textContent = 'Profil';
+          }
+        } else {
+          // Benutzer ist nicht angemeldet
+          console.log("User is signed out");
+          
+          // Optional: Login-Button-Text zurücksetzen
+          if (loginButton) {
+            loginButton.textContent = 'Login';
+          }
+        }
+      });
+      
+      // Prüfe auf Redirect-Ergebnis (falls Redirect-Flow verwendet wird)
+      firebase.auth().getRedirectResult().then(function(result) {
+        if (result.user) {
+          console.log("User signed in after redirect:", result.user.displayName);
+        }
+      }).catch(function(error) {
+        console.error("Redirect error:", error);
+      });
+    });
+  </script>
+
+  <!-- Add this button somewhere in your HTML where you want it to appear -->
+  <button id="profileButton" style="display: none; padding: 10px 15px; background-color: #00BFFF; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 10px 0;">
+    Manage Profile
+  </button>
+
+  <!-- Add this script at the end of your body tag -->
+  <script>
+    // Initialize Firebase if not already initialized
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+      const firebaseConfig = {
+        apiKey: "AIzaSyClBe85KzYpdCBmidhGlJlw-1eUZG9aBg8",
+        authDomain: "simplixgymrewards.firebaseapp.com",
+        databaseURL: "https://simplixgymrewards-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "simplixgymrewards",
+        storageBucket: "simplixgymrewards.firebasestorage.app",
+        messagingSenderId: "821049711023",
+        appId: "1:821049711023:web:32fb1e80755cc00531f75a"
+      };
+      
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    // Function to show profile management modal
+    function showProfileModal() {
+      // Check if userProfile exists before accessing it
+      if (!window.userProfile) {
+        console.log("User profile not initialized yet. Initializing empty profile.");
+        window.userProfile = {
+          displayName: "",
+          email: "",
+          studio: "",
+          points: 0
+        };
+      }
+      
+      // Now safely access userProfile
+      document.getElementById('profileUsername').value = window.userProfile.displayName || "";
+      document.getElementById('profileEmail').value = window.userProfile.email || "";
+      document.getElementById('profileStudio').value = window.userProfile.studio || "";
+      document.getElementById('profilePoints').textContent = window.userProfile.points || 0;
+      
+      // Show the modal
+      document.getElementById('profileModal').style.display = 'block';
+    }
+
+    // Add leaderboard interval management
+    // Note: leaderboardInterval is defined as a global variable at the top of the page
+
+   // function toggleLeaderboard(show) {
+   //   const leaderboard = document.getElementById('leaderboard');
+   //   if (!leaderboard) return;
+      
+   //   if (show) {
+   //     leaderboard.style.display = 'block';
+   //     leaderboard.style.opacity = '0';
+        // Force reflow
+        void leaderboard.offsetWidth;
+        leaderboard.style.opacity = '1';
+        // Update leaderboard data
+        fetchAndDisplayLeaderboard();
+   //   } else {
+        leaderboard.style.opacity = '0';
+        setTimeout(() => {
+          leaderboard.style.display = 'none';
+        }, 500); // Match transition duration
+    //  }
+    //}
+
+    function toggleLeaderboard(show) {
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) return;
+      
+      if (show) {
+        leaderboard.style.display = 'block';
+        leaderboard.style.opacity = '0';
+        // Force reflow
+        void leaderboard.offsetWidth;
+        leaderboard.style.opacity = '1';
+        // Update leaderboard data
+        updateLeaderboardData();
+      } else {
+        leaderboard.style.opacity = '0';
+        setTimeout(() => {
+          leaderboard.style.display = 'none';
+        }, 500); // Match transition duration
+      }
+    }
+
+    function startLeaderboardInterval() {
+      // Clear any existing interval
+      if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+        leaderboardInterval = null;
+      }
+
+      // Initial state - hide leaderboard
+      toggleLeaderboard(false);
+      
+      // Prefetch data immediately to have it ready
+      updateLeaderboardData().catch(error => {
+        console.log("Initial data fetch failed:", error);
+      });
+
+      // Set up the interval
+      leaderboardInterval = setInterval(() => {
+        // Show leaderboard
+        toggleLeaderboard(true);
+        
+        // Hide after 15 seconds (changed from 10 seconds)
+        setTimeout(() => {
+          toggleLeaderboard(false);
+        }, 15000);
+      }, 30000); // Total cycle: 30 seconds (15 seconds on + 15 seconds off)
+    }
+
+    // Initialize when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM loaded, initializing leaderboard");
+      
+      // Add transition styles for smooth animation and update size/opacity
+      const style = document.createElement('style');
+      style.textContent = `
+        .leaderboard-section {
+          transition: opacity 0.5s ease-in-out;
+          opacity: 0.85 !important; /* Set opacity to 85% (changed from 75%) */
+        }
+        
+        /* Reduce size by 25% for 4K displays */
+        @media (min-width: 3840px) and (aspect-ratio: 16/9) {
+          .leaderboard-section {
+            width: 75%; /* 25% smaller than original 100% */
+            max-width: 1500px; /* Reduced from original max-width */
+            transform: translate(-50%, -50%) scale(0.75); /* Scale down by 25% */
+            transform-origin: center center;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Get the leaderboard element
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // Apply initial styles directly
+      leaderboard.style.opacity = '0';
+      leaderboard.style.visibility = 'hidden';
+      leaderboard.style.display = 'block'; // Ensure it's in the DOM
+      
+      // Start the leaderboard cycle
+      startLeaderboardInterval();
+    });
+  </script>
+
+  <!-- Add this script to fetch and display the leaderboard -->
+  <script>
+    // Function to update leaderboard data
+    function updateLeaderboardData() {
+      console.log("Updating leaderboard data");
+      
+      // Prevent multiple simultaneous fetches
+      if (isLeaderboardDataFetching) {
+        console.log("Data fetch already in progress, skipping");
+        return Promise.resolve(cachedLeaderboardData);
+      }
+      
+      const leaderboardList = document.getElementById('leaderboardList');
+      if (!leaderboardList) {
+        console.error("Leaderboard list not found");
+        return Promise.reject("Leaderboard list not found");
+      }
+      
+      // Check if we should use cached data (less than 1 minute old)
+      const now = Date.now();
+      if (cachedLeaderboardData && (now - lastFetchTime < CACHE_DURATION)) {
+        console.log("Using cached leaderboard data");
+        displayLeaderboardData(cachedLeaderboardData);
+        return Promise.resolve(cachedLeaderboardData);
+      }
+      
+      // Show loading message only if we don't have cached data
+      if (!cachedLeaderboardData) {
+        leaderboardList.innerHTML = '<div class="loading-message">Loading leaderboard data...</div>';
+      } else {
+        // If we have cached data, display it immediately while fetching new data
+        displayLeaderboardData(cachedLeaderboardData);
+      }
+      
+      // Set fetching flag
+      isLeaderboardDataFetching = true;
+      
+      // Check if Firebase is available
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        console.log("Fetching data from Firebase");
+        const db = firebase.firestore();
+        let gymMap = {}; // Store gym ID to name mappings
+        
+        // Return a promise for better control flow
+        return db.collection('gyms').get()
+          .then(gymSnapshot => {
+            // Create a map of gym IDs to gym names
+            gymSnapshot.forEach(gymDoc => {
+              gymMap[gymDoc.id] = gymDoc.data().name || gymDoc.id;
+            });
+            
+            console.log("Fetched gym data");
+            
+            // Now fetch users data
+            return db.collection('users')
+              .orderBy('points', 'desc')
+              .limit(10)
+              .get();
+          })
+          .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+              console.log("No user data found");
+              return [];
+            }
+            
+            // Process user data
+            const leaderboardData = [];
+            querySnapshot.docs.forEach((doc, index) => {
+              const userData = doc.data();
+              const rank = index + 1;
+              
+              // Get gym name from the map
+              const gymIdentifier = userData.gymId || userData['gym-id'];
+              const gymName = gymMap[gymIdentifier] || userData.gymName || userData['gym-name'] || gymIdentifier || 'Unknown';
+              
+              // Get loyalty tier
+              const loyaltyTier = userData['loyalty-tier'] || 
+                              userData.loyaltyTier || 
+                              userData['loyalty_tier'] || 
+                              (userData.loyalty ? userData.loyalty.tier : null) || 
+                              userData.tier ||
+                              'None';
+              
+              // Add to leaderboard data
+              leaderboardData.push({
+                rank: rank,
+                name: userData.name || 'Anonymous',
+                games: userData['number-played'] || 0,
+                points: userData.points || 0,
+                gym: gymName,
+                tier: loyaltyTier
+              });
+            });
+            
+            // Cache the data
+            cachedLeaderboardData = leaderboardData;
+            lastFetchTime = Date.now();
+            
+            // Display the data
+            displayLeaderboardData(leaderboardData);
+            console.log("Leaderboard data displayed from Firebase");
+            
+            // Reset fetching flag
+            isLeaderboardDataFetching = false;
+            
+            return leaderboardData;
+          })
+          .catch(error => {
+            console.error("Error fetching data from Firebase:", error);
+            // Reset fetching flag
+            isLeaderboardDataFetching = false;
+            
+            // If we have cached data, use it
+            if (cachedLeaderboardData) {
+              console.log("Using cached data after fetch error");
+              displayLeaderboardData(cachedLeaderboardData);
+              return cachedLeaderboardData;
+            }
+            
+            return Promise.reject(error);
+          });
+      } else {
+        console.log("Firebase not available");
+        isLeaderboardDataFetching = false;
+        return Promise.reject("Firebase not available");
+      }
+    }
+    
+    // Function to display leaderboard data
+    function displayLeaderboardData(data) {
+      try {
+        const leaderboardList = document.getElementById('leaderboardList');
+        if (!leaderboardList) {
+          console.error("Leaderboard list not found");
+          return;
+        }
+        
+        // Clear existing entries
+        leaderboardList.innerHTML = '';
+        
+        // Create a document fragment for better performance
+        const fragment = document.createDocumentFragment();
+        
+        // Add entries
+        data.forEach((player) => {
+          const rank = player.rank;
+          const entryDiv = document.createElement('div');
+          entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+          
+          // Trophy icons
+          let trophyIcon = '';
+          if (rank === 1) trophyIcon = '🏆';
+          else if (rank === 2) trophyIcon = '🥈';
+          else if (rank === 3) trophyIcon = '🥉';
+          
+          entryDiv.innerHTML = `
+            <div class="rank-column">
+              <div class="rank-badge">${rank}</div>
+            </div>
+            <div class="name-column">${player.name} ${trophyIcon}</div>
+            <div class="games-column">${player.games}</div>
+            <div class="points-column">${player.points}</div>
+            <div class="gym-column">${player.gym}</div>
+            <div class="tier-column">${player.tier}</div>
+          `;
+          
+          fragment.appendChild(entryDiv);
+        });
+        
+        // Append all entries at once
+        leaderboardList.appendChild(fragment);
+        
+        console.log("Leaderboard data displayed");
+      } catch (error) {
+        console.error("Error displaying leaderboard data:", error);
+      }
+    }
+
+    // Single consolidated function to toggle leaderboard visibility
+    function toggleLeaderboard(show) {
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // If show parameter is undefined, toggle based on current state
+      if (show === undefined) {
+        show = !isLeaderboardVisible;
+      }
+      
+      if (show && !isLeaderboardVisible) {
+        console.log("Showing leaderboard");
+        isLeaderboardVisible = true;
+        
+        // Make the leaderboard visible but with opacity 0
+        leaderboard.style.display = 'block';
+        leaderboard.style.visibility = 'visible';
+        leaderboard.style.opacity = '0';
+        
+        // First ensure we have data (either cached or fresh)
+        updateLeaderboardData()
+          .then(() => {
+            // Force reflow before changing opacity
+            void leaderboard.offsetWidth;
+            leaderboard.style.opacity = '1';
+          })
+          .catch(error => {
+            console.error("Error showing leaderboard:", error);
+            // Hide the leaderboard if there's an error
+            isLeaderboardVisible = false;
+            leaderboard.style.opacity = '0';
+            setTimeout(() => {
+              leaderboard.style.visibility = 'hidden';
+              leaderboard.style.display = 'none';
+            }, 500);
+          });
+      } else if (!show && isLeaderboardVisible) {
+        console.log("Hiding leaderboard");
+        isLeaderboardVisible = false;
+        leaderboard.style.opacity = '0';
+        
+        setTimeout(() => {
+          leaderboard.style.visibility = 'hidden';
+          leaderboard.style.display = 'none';
+        }, 500); // Match transition duration
+      }
+    }
+
+    // Function to start the leaderboard display cycle
+    function startLeaderboardInterval() {
+      // Clear any existing interval
+      if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+        leaderboardInterval = null;
+      }
+
+      // Initial state - hide leaderboard
+      toggleLeaderboard(false);
+      
+      // Prefetch data immediately to have it ready
+      updateLeaderboardData().catch(error => {
+        console.log("Initial data fetch failed:", error);
+      });
+
+      // Set up the interval
+      leaderboardInterval = setInterval(() => {
+        // Show leaderboard
+        toggleLeaderboard(true);
+        
+        // Hide after 15 seconds (changed from 10 seconds)
+        setTimeout(() => {
+          toggleLeaderboard(false);
+        }, 15000);
+      }, 30000); // Total cycle: 30 seconds (15 seconds on + 15 seconds off)
+    }
+
+    // Function to handle showing leaderboard on demand
+    function showLeaderboard() {
+      console.log("Showing leaderboard as requested");
+      
+      // Clear any existing interval
+      if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+        leaderboardInterval = null;
+      }
+      
+      // Show the leaderboard
+      toggleLeaderboard(true);
+      
+      // Hide after 15 seconds (unchanged since it was already 15 seconds)
+      setTimeout(() => {
+        toggleLeaderboard(false);
+        
+        // Restart the normal interval
+        startLeaderboardInterval();
+      }, 15000);
+    }
+
+    // Initialize when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM loaded, initializing leaderboard");
+      
+      // Add transition styles for smooth animation and update size/opacity
+      const style = document.createElement('style');
+      style.textContent = `
+        .leaderboard-section {
+          transition: opacity 0.5s ease-in-out;
+          opacity: 0.85 !important; /* Set opacity to 85% (changed from 75%) */
+        }
+        
+        /* Reduce size by 25% for 4K displays */
+        @media (min-width: 3840px) and (aspect-ratio: 16/9) {
+          .leaderboard-section {
+            width: 75%; /* 25% smaller than original 100% */
+            max-width: 1500px; /* Reduced from original max-width */
+            transform: translate(-50%, -50%) scale(0.75); /* Scale down by 25% */
+            transform-origin: center center;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Get the leaderboard element
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // Apply initial styles directly
+      leaderboard.style.opacity = '0';
+      leaderboard.style.visibility = 'hidden';
+      leaderboard.style.display = 'block'; // Ensure it's in the DOM
+      
+      // Start the leaderboard cycle
+      startLeaderboardInterval();
+    });
+  </script>
+
+  <!-- Add this script at the end of the body -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM loaded, initializing leaderboard");
+      
+      // Get the leaderboard element
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // Apply initial styles directly
+      leaderboard.style.opacity = '0';
+      leaderboard.style.visibility = 'hidden';
+      leaderboard.style.display = 'block'; // Ensure it's in the DOM
+      
+      // Prefetch data immediately to have it ready
+      if (typeof updateLeaderboardData === 'function') {
+        try {
+          updateLeaderboardData();
+        } catch (error) {
+          console.error("Error prefetching leaderboard data:", error);
+        }
+      } else {
+        console.error("updateLeaderboardData function not found");
+      }
+      
+      // Simple function to show/hide leaderboard
+      function toggleLeaderboard() {
+        if (leaderboard.style.opacity === '1') {
+          // Currently visible, hide it
+          console.log("Hiding leaderboard");
+          leaderboard.style.opacity = '0';
+          leaderboard.style.visibility = 'hidden';
+          
+          // Schedule next show
+          setTimeout(toggleLeaderboard, 20000);
+        } else {
+          // Currently hidden, show it
+          console.log("Showing leaderboard");
+          leaderboard.style.display = 'block'; // Ensure it's displayed
+          
+          // Force reflow before changing opacity
+          void leaderboard.offsetWidth;
+          
+          leaderboard.style.opacity = '1';
+          leaderboard.style.visibility = 'visible';
+          
+          // Update leaderboard data
+          if (typeof updateLeaderboardData === 'function') {
+            try {
+              updateLeaderboardData();
+            } catch (error) {
+              console.error("Error updating leaderboard data:", error);
+            }
+          }
+          
+          // Schedule next hide
+          setTimeout(toggleLeaderboard, 20000);
+        }
+      }
+      
+      // Start the cycle with a short delay
+      setTimeout(toggleLeaderboard, 1000);
+    });
+  </script>
+
+  <!-- Add a debug button to manually toggle the leaderboard -->
+  <script>
+    // Debug button disabled as requested
+    // The automatic toggle cycle will still work as normal
+  </script>
+
+  <!-- Global variables are defined at the top of the page -->
+  <script>
+    // Global variables for leaderboard data caching and control
+    var cachedLeaderboardData = null;
+    var lastFetchTime = 0;
+    var CACHE_DURATION = 60000; // 1 minute cache
+    var leaderboardInterval = null;
+    var isLeaderboardVisible = false;
+    var isLeaderboardDataFetching = false;
+  </script>
+
+  <!-- Add this script to handle all leaderboard functionality -->
+  <script>
+    // Function to update leaderboard data
+    function updateLeaderboardData() {
+      console.log("Updating leaderboard data");
+      
+      // Prevent multiple simultaneous fetches
+      if (isLeaderboardDataFetching) {
+        console.log("Data fetch already in progress, skipping");
+        return Promise.resolve(cachedLeaderboardData);
+      }
+      
+      const leaderboardList = document.getElementById('leaderboardList');
+      if (!leaderboardList) {
+        console.error("Leaderboard list not found");
+        return Promise.reject("Leaderboard list not found");
+      }
+      
+      // Check if we should use cached data (less than 1 minute old)
+      const now = Date.now();
+      if (cachedLeaderboardData && (now - lastFetchTime < CACHE_DURATION)) {
+        console.log("Using cached leaderboard data");
+        displayLeaderboardData(cachedLeaderboardData);
+        return Promise.resolve(cachedLeaderboardData);
+      }
+      
+      // Show loading message only if we don't have cached data
+      if (!cachedLeaderboardData) {
+        leaderboardList.innerHTML = '<div class="loading-message">Loading leaderboard data...</div>';
+      } else {
+        // If we have cached data, display it immediately while fetching new data
+        displayLeaderboardData(cachedLeaderboardData);
+      }
+      
+      // Set fetching flag
+      isLeaderboardDataFetching = true;
+      
+      // Check if Firebase is available
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        console.log("Fetching data from Firebase");
+        const db = firebase.firestore();
+        let gymMap = {}; // Store gym ID to name mappings
+        
+        // Return a promise for better control flow
+        return db.collection('gyms').get()
+          .then(gymSnapshot => {
+            // Create a map of gym IDs to gym names
+            gymSnapshot.forEach(gymDoc => {
+              gymMap[gymDoc.id] = gymDoc.data().name || gymDoc.id;
+            });
+            
+            console.log("Fetched gym data");
+            
+            // Now fetch users data
+            return db.collection('users')
+              .orderBy('points', 'desc')
+              .limit(10)
+              .get();
+          })
+          .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+              console.log("No user data found");
+              return [];
+            }
+            
+            // Process user data
+            const leaderboardData = [];
+            querySnapshot.docs.forEach((doc, index) => {
+              const userData = doc.data();
+              const rank = index + 1;
+              
+              // Get gym name from the map
+              const gymIdentifier = userData.gymId || userData['gym-id'];
+              const gymName = gymMap[gymIdentifier] || userData.gymName || userData['gym-name'] || gymIdentifier || 'Unknown';
+              
+              // Get loyalty tier
+              const loyaltyTier = userData['loyalty-tier'] || 
+                              userData.loyaltyTier || 
+                              userData['loyalty_tier'] || 
+                              (userData.loyalty ? userData.loyalty.tier : null) || 
+                              userData.tier ||
+                              'None';
+              
+              // Add to leaderboard data
+              leaderboardData.push({
+                rank: rank,
+                name: userData.name || 'Anonymous',
+                games: userData['number-played'] || 0,
+                points: userData.points || 0,
+                gym: gymName,
+                tier: loyaltyTier
+              });
+            });
+            
+            // Cache the data
+            cachedLeaderboardData = leaderboardData;
+            lastFetchTime = Date.now();
+            
+            // Display the data
+            displayLeaderboardData(leaderboardData);
+            console.log("Leaderboard data displayed from Firebase");
+            
+            // Reset fetching flag
+            isLeaderboardDataFetching = false;
+            
+            return leaderboardData;
+          })
+          .catch(error => {
+            console.error("Error fetching data from Firebase:", error);
+            // Reset fetching flag
+            isLeaderboardDataFetching = false;
+            
+            // If we have cached data, use it
+            if (cachedLeaderboardData) {
+              console.log("Using cached data after fetch error");
+              displayLeaderboardData(cachedLeaderboardData);
+              return cachedLeaderboardData;
+            }
+            
+            return Promise.reject(error);
+          });
+      } else {
+        console.log("Firebase not available");
+        isLeaderboardDataFetching = false;
+        return Promise.reject("Firebase not available");
+      }
+    }
+    
+    // Function to display leaderboard data
+    function displayLeaderboardData(data) {
+      try {
+        const leaderboardList = document.getElementById('leaderboardList');
+        if (!leaderboardList) {
+          console.error("Leaderboard list not found");
+          return;
+        }
+        
+        // Clear existing entries
+        leaderboardList.innerHTML = '';
+        
+        // Create a document fragment for better performance
+        const fragment = document.createDocumentFragment();
+        
+        // Add entries
+        data.forEach((player) => {
+          const rank = player.rank;
+          const entryDiv = document.createElement('div');
+          entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+          
+          // Trophy icons
+          let trophyIcon = '';
+          if (rank === 1) trophyIcon = '🏆';
+          else if (rank === 2) trophyIcon = '🥈';
+          else if (rank === 3) trophyIcon = '🥉';
+          
+          entryDiv.innerHTML = `
+            <div class="rank-column">
+              <div class="rank-badge">${rank}</div>
+            </div>
+            <div class="name-column">${player.name} ${trophyIcon}</div>
+            <div class="games-column">${player.games}</div>
+            <div class="points-column">${player.points}</div>
+            <div class="gym-column">${player.gym}</div>
+            <div class="tier-column">${player.tier}</div>
+          `;
+          
+          fragment.appendChild(entryDiv);
+        });
+        
+        // Append all entries at once
+        leaderboardList.appendChild(fragment);
+        
+        console.log("Leaderboard data displayed");
+      } catch (error) {
+        console.error("Error displaying leaderboard data:", error);
+      }
+    }
+
+    // Single consolidated function to toggle leaderboard visibility
+    function toggleLeaderboard(show) {
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // If show parameter is undefined, toggle based on current state
+      if (show === undefined) {
+        show = !isLeaderboardVisible;
+      }
+      
+      if (show && !isLeaderboardVisible) {
+        console.log("Showing leaderboard");
+        isLeaderboardVisible = true;
+        
+        // Make the leaderboard visible but with opacity 0
+        leaderboard.style.display = 'block';
+        leaderboard.style.visibility = 'visible';
+        leaderboard.style.opacity = '0';
+        
+        // First ensure we have data (either cached or fresh)
+        updateLeaderboardData()
+          .then(() => {
+            // Force reflow before changing opacity
+            void leaderboard.offsetWidth;
+            leaderboard.style.opacity = '1';
+          })
+          .catch(error => {
+            console.error("Error showing leaderboard:", error);
+            // Hide the leaderboard if there's an error
+            isLeaderboardVisible = false;
+            leaderboard.style.opacity = '0';
+            setTimeout(() => {
+              leaderboard.style.visibility = 'hidden';
+              leaderboard.style.display = 'none';
+            }, 500);
+          });
+      } else if (!show && isLeaderboardVisible) {
+        console.log("Hiding leaderboard");
+        isLeaderboardVisible = false;
+        leaderboard.style.opacity = '0';
+        
+        setTimeout(() => {
+          leaderboard.style.visibility = 'hidden';
+          leaderboard.style.display = 'none';
+        }, 500); // Match transition duration
+      }
+    }
+
+    // Function to start the leaderboard display cycle
+    function startLeaderboardInterval() {
+      // Clear any existing interval
+      if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+        leaderboardInterval = null;
+      }
+
+      // Initial state - hide leaderboard
+      toggleLeaderboard(false);
+      
+      // Prefetch data immediately to have it ready
+      updateLeaderboardData().catch(error => {
+        console.log("Initial data fetch failed:", error);
+      });
+
+      // Set up the interval
+      leaderboardInterval = setInterval(() => {
+        // Show leaderboard
+        toggleLeaderboard(true);
+        
+        // Hide after 15 seconds (changed from 10 seconds)
+        setTimeout(() => {
+          toggleLeaderboard(false);
+        }, 15000);
+      }, 30000); // Total cycle: 30 seconds (15 seconds on + 15 seconds off)
+    }
+
+    // Function to handle showing leaderboard on demand
+    function showLeaderboard() {
+      console.log("Showing leaderboard as requested");
+      
+      // Clear any existing interval
+      if (leaderboardInterval) {
+        clearInterval(leaderboardInterval);
+        leaderboardInterval = null;
+      }
+      
+      // Show the leaderboard
+      toggleLeaderboard(true);
+      
+      // Hide after 15 seconds (unchanged since it was already 15 seconds)
+      setTimeout(() => {
+        toggleLeaderboard(false);
+        
+        // Restart the normal interval
+        startLeaderboardInterval();
+      }, 15000);
+    }
+
+    // Initialize when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM loaded, initializing leaderboard");
+      
+      // Add transition styles for smooth animation and update size/opacity
+      const style = document.createElement('style');
+      style.textContent = `
+        .leaderboard-section {
+          transition: opacity 0.5s ease-in-out;
+          opacity: 0.85 !important; /* Set opacity to 85% (changed from 75%) */
+        }
+        
+        /* Reduce size by 25% for 4K displays */
+        @media (min-width: 3840px) and (aspect-ratio: 16/9) {
+          .leaderboard-section {
+            width: 75%; /* 25% smaller than original 100% */
+            max-width: 1500px; /* Reduced from original max-width */
+            transform: translate(-50%, -50%) scale(0.75); /* Scale down by 25% */
+            transform-origin: center center;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Get the leaderboard element
+      const leaderboard = document.getElementById('leaderboard');
+      if (!leaderboard) {
+        console.error("Leaderboard element not found!");
+        return;
+      }
+      
+      // Apply initial styles directly
+      leaderboard.style.opacity = '0';
+      leaderboard.style.visibility = 'hidden';
+      leaderboard.style.display = 'block'; // Ensure it's in the DOM
+      
+      // Start the leaderboard cycle
+      startLeaderboardInterval();
+    });
+  </script>
+
+  <!-- Add a debug button to manually toggle the leaderboard -->
+  <script>
+    // Debug button disabled as requested
+    // The automatic toggle cycle will still work as normal
+  </script>
+</body>
+</html>
