@@ -27,10 +27,10 @@ function setupFirebaseListener(displayId) {
   function logoutDueToInactivity() {
     console.log("Session timeout: User inactive for 30 minutes");
     
-    // Clear any existing intervals
-    if (window.connectionCheckInterval) {
-      clearInterval(window.connectionCheckInterval);
-      window.connectionCheckInterval = null;
+    // Clear any existing listeners
+    if (window.connectionListener) {
+      window.connectionListener();
+      window.connectionListener = null;
     }
     
     // Clear the session timeout
@@ -88,7 +88,7 @@ function setupFirebaseListener(displayId) {
       connectionStatus.classList.remove('connected');
     }
     
-    // Send connection message
+    // Send connection message once instead of polling
     setDisplayContent("CONNECTED")
       .then(function() {
         console.log("Connection message sent for display " + displayId);
@@ -116,18 +116,6 @@ function setupFirebaseListener(displayId) {
               });
           }
           
-          // Set up periodic connection check
-          if (window.connectionCheckInterval) {
-            clearInterval(window.connectionCheckInterval);
-          }
-          window.connectionCheckInterval = setInterval(() => {
-            setDisplayContent("CONNECTED")
-              .catch(error => {
-                console.error("Connection check failed:", error);
-                attemptConnection(); // Try to reconnect on failure
-              });
-          }, 30000); // Check every 30 seconds
-          
           // Initialize session timeout
           resetSessionTimeout();
           // Set up activity listeners
@@ -153,11 +141,11 @@ function setupFirebaseListener(displayId) {
   
   // Clean up on page unload
   window.addEventListener('beforeunload', function() {
-    if (window.connectionCheckInterval) {
-      clearInterval(window.connectionCheckInterval);
-    }
     if (sessionTimeoutTimer) {
       clearTimeout(sessionTimeoutTimer);
+    }
+    if (window.connectionListener) {
+      window.connectionListener();
     }
     setDisplayContent(""); // Clear content on disconnect
   });

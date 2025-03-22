@@ -192,6 +192,19 @@
             font-size: min(4vw, 1.2rem);
             background-color: rgba(0, 191, 255, 0.2);
         }
+        
+        .last-updated {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        /* Add this to fix the Safari backdrop-filter compatibility issue */
+        .modal-content, .any-element-with-backdrop-filter {
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -217,6 +230,8 @@
         </div>
         <div class="loading-message">Loading leaderboard data...</div>
     </div>
+    
+    <div class="last-updated" id="last-updated"></div>
     
     <button class="back-button" onclick="goBack()">Zurück</button>
     
@@ -259,6 +274,15 @@
         function goBack() {
             window.location.href = '/';
         }
+        
+        // Cache for leaderboard data
+        const leaderboardCache = {
+            data: null,
+            gymMap: {},
+            timestamp: null,
+            // Cache valid for 1 hour by default
+            validityPeriod: 60 * 60 * 1000
+        };
         
         // Helper function for rank background colors
         function getRankBackground(rank) {
@@ -316,55 +340,248 @@
             return entryDiv;
         }
         
-        // Load leaderboard data
-        function loadLeaderboard() {
+        // Function to display leaderboard from cache or fetch new data
+        function displayLeaderboard() {
             const leaderboardContent = document.getElementById('leaderboard-content');
+            const lastUpdatedText = document.getElementById('last-updated');
+            
+            if (!leaderboardContent) {
+                return;
+            }
+            
+            // First check if we need to fetch new data
+            shouldRefreshLeaderboard()
+                .then(needsRefresh => {
+                    if (needsRefresh) {
+                        // New data needed, fetch it
+                        logDebug("Leaderboard needs refresh or cache is invalid");
+                        fetchAndDisplayLeaderboard();
+                    } else if (leaderboardCache.data && leaderboardCache.timestamp) {
+                        // Use cached data
+                        logDebug("Using cached leaderboard data");
+                        displayCachedLeaderboard();
+                        
+                        // Update last updated text
+                        const lastUpdated = new Date(leaderboardCache.timestamp);
+                        lastUpdatedText.textContent = `Last updated: ${lastUpdated.toLocaleString()}`;
+                    } else {
+                        // No cache, fetch new data
+                        logDebug("No cached data available, fetching new data");
+                        fetchAndDisplayLeaderboard();
+                    }
+                })
+                .catch(error => {
+                    logDebug(`Error checking if refresh needed: ${error.message}`);
+                    
+                    // If error, try to use cache if available
+                    if (leaderboardCache.data) {
+                        displayCachedLeaderboard();
+                    } else {
+                        // No cache, show fallback
+                        showFallbackData();
+                    }
+                });
+        }
+        
+        // Function to check if we should refresh the leaderboard
+        function shouldRefreshLeaderboard() {
+            return new Promise((resolve, reject) => {
+                // If no cache or cache is old (>1 hour), always refresh
+                if (!leaderboardCache.data || !leaderboardCache.timestamp || 
+                    (Date.now() - leaderboardCache.timestamp > leaderboardCache.validityPeriod)) {
+                    return resolve(true);
+                }
+                
+                // Check if there's a flag in Firestore indicating we need to refresh
+                const db = firebase.firestore();
+                db.collection('system').doc('leaderboard')
+                    .get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            // If lastRefreshed is newer than our cache, refresh
+                            if (data.lastRefreshed && data.lastRefreshed.toMillis() > leaderboardCache.timestamp) {
+                                return resolve(true);
+                            }
+                            // If needsRefresh flag is true, refresh
+                            if (data.needsRefresh === true) {
+                                return resolve(true);
+                            }
+                        }
+                        // Otherwise, no need to refresh
+                        resolve(false);
+                    })
+                    .catch(err => {
+                        logDebug("Error checking leaderboard status: " + err.message);
+                        // If error checking, use cache age as fallback decision
+                        resolve(Date.now() - leaderboardCache.timestamp > 15 * 60 * 1000); // 15 minutes
+                    });
+            });
+        }
+        
+        // Function to display leaderboard from cache
+        function displayCachedLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            if (!leaderboardContent || !leaderboardCache.data) return;
+            
+            // Clear existing content
+            leaderboardContent.innerHTML = '';
+            
+            // Recreate the header
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'leaderboard-header';
+            headerDiv.innerHTML = `
+                <div>Rank</div>
+                <div>Player</div>
+                <div>Rounds</div>
+                <div>Points</div>
+                <div>Studio</div>
+                <div>Tier</div>
+            `;
+            leaderboardContent.appendChild(headerDiv);
+            
+            // Add cached entries
+            leaderboardCache.data.forEach((entry, index) => {
+                leaderboardContent.appendChild(createLeaderboardEntry(entry, index));
+            });
+        }
+        
+        // Function to create leaderboard entry from user data
+        function createLeaderboardEntry(userData, index) {
+            const rank = index + 1;
+            
+            // Get gym name from the map
+            let gymName = 'Unknown';
+            const gymIdentifier = userData.gymId || userData['gym-id'];
+            if (gymIdentifier && leaderboardCache.gymMap[gymIdentifier]) {
+                gymName = leaderboardCache.gymMap[gymIdentifier];
+            } else if (gymIdentifier) {
+                gymName = gymIdentifier;
+            }
+            
+            // Get loyalty tier - check both formats and all possible field names
+            const loyaltyTier = userData['loyalty-tier'] || 
+                            userData.loyaltyTier || 
+                            userData['loyalty_tier'] || 
+                            (userData.loyalty ? userData.loyalty.tier : null) || 
+                            'None';
+            
+            // Create entry
+            const entryDiv = document.createElement('div');
+            entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
+            entryDiv.style.animation = `slideIn 0.3s ease-out ${index * 0.1}s forwards`;
+            entryDiv.style.opacity = '0';
+            
+            // Determine trophy icon for top 3
+            let trophyIcon = '';
+            if (rank === 1) trophyIcon = '🏆';
+            else if (rank === 2) trophyIcon = '🥈';
+            else if (rank === 3) trophyIcon = '🥉';
+            
+            // Create entry content
+            entryDiv.innerHTML = `
+                <div style="width: 30px; text-align: center; font-weight: bold; font-size: 18px;">${rank}</div>
+                <div style="flex: 1; margin-left: 15px; font-weight: bold; font-size: 16px;">
+                    ${userData.name || 'Anonymous'} ${trophyIcon}
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 14px;">Rounds: ${userData['number-played'] || 0}</div>
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 16px; font-weight: bold;">Points: ${userData.points || 0}</div>
+                </div>
+                <div style="width: 120px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <div style="font-size: 14px;">${gymName}</div>
+                </div>
+                <div style="width: 80px; text-align: center;">
+                    <div style="font-size: 14px;">${loyaltyTier}</div>
+                </div>
+            `;
+            
+            return entryDiv;
+        }
+        
+        // Function to fetch and display leaderboard
+        function fetchAndDisplayLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            const lastUpdatedText = document.getElementById('last-updated');
+            
+            if (!leaderboardContent) return;
+            
+            // Show loading message
+            leaderboardContent.innerHTML = `
+                <div class="leaderboard-header">
+                    <div>Rank</div>
+                    <div>Player</div>
+                    <div>Rounds</div>
+                    <div>Points</div>
+                    <div>Studio</div>
+                    <div>Tier</div>
+                </div>
+                <div class="loading-message">Loading leaderboard data...</div>
+            `;
+            
             logDebug("Starting to fetch leaderboard data");
             
             // Try to sign in anonymously first
             firebase.auth().signInAnonymously()
                 .then(() => {
                     logDebug("Anonymous auth successful");
-                    return fetchLeaderboardData();
+                    return fetchData();
                 })
                 .catch((error) => {
                     logDebug(`Anonymous auth failed: ${error.message}`);
                     // If anonymous auth fails, try to fetch data directly
-                    return fetchLeaderboardData();
+                    return fetchData();
                 });
                 
-            function fetchLeaderboardData() {
-                // First try to get data from Firestore
+            function fetchData() {
                 const db = firebase.firestore();
-                logDebug("Firebase status: Initialized");
-                logDebug("Starting to fetch leaderboard data from Firestore");
                 
-                // Create a Firestore instance
-                logDebug("Firestore instance created");
-                
-                // First, fetch all gym data
-                let gymMap = {}; // Store gym ID to name mappings
-                
-                db.collection('gyms').get()
+                // First, fetch all gym data (do this once and cache it)
+                return db.collection('gyms').get()
                     .then(gymSnapshot => {
+                        // Reset gym map
+                        leaderboardCache.gymMap = {};
+                        
                         // Create a map of gym IDs to gym names
                         gymSnapshot.forEach(gymDoc => {
-                            gymMap[gymDoc.id] = gymDoc.data().name || gymDoc.id;
+                            leaderboardCache.gymMap[gymDoc.id] = gymDoc.data().name || gymDoc.id;
                         });
                         
-                        logDebug("Fetched gym data: " + JSON.stringify(gymMap));
+                        logDebug("Fetched gym data: " + Object.keys(leaderboardCache.gymMap).length + " gyms");
                         
-                        // Now fetch users data
+                        // Now fetch top 10 users
                         return db.collection('users')
                             .orderBy('points', 'desc')
                             .limit(10)
                             .get();
                     })
-                    .then((querySnapshot) => {
+                    .then(querySnapshot => {
                         logDebug("Firestore query completed. Found " + querySnapshot.size + " documents");
                         
-                        // Clear loading message
+                        // Update leaderboard refresh flag
+                        db.collection('system').doc('leaderboard').set({
+                            needsRefresh: false,
+                            lastRefreshed: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true })
+                        .catch(err => logDebug("Error updating leaderboard flag: " + err.message));
+                        
+                        // Clear existing content
                         leaderboardContent.innerHTML = '';
+                        
+                        // Recreate the header
+                        const headerDiv = document.createElement('div');
+                        headerDiv.className = 'leaderboard-header';
+                        headerDiv.innerHTML = `
+                            <div>Rank</div>
+                            <div>Player</div>
+                            <div>Rounds</div>
+                            <div>Points</div>
+                            <div>Studio</div>
+                            <div>Tier</div>
+                        `;
+                        leaderboardContent.appendChild(headerDiv);
                         
                         if (querySnapshot.empty) {
                             // If no data in Firestore, show fallback data
@@ -372,88 +589,72 @@
                             return;
                         }
                         
+                        // Update cache
+                        leaderboardCache.data = querySnapshot.docs.map(doc => doc.data());
+                        leaderboardCache.timestamp = Date.now();
+                        
                         // Process each user document
                         querySnapshot.docs.forEach((doc, index) => {
                             const userData = doc.data();
-                            logDebug(`Processing user document NaN: ${JSON.stringify(userData)}`);
-                            const rank = index + 1;
+                            logDebug(`Processing user document ${index + 1}: ${userData.name || 'Anonymous'}`);
                             
-                            // Get gym name from the map - check both gymId and gym-id fields
-                            let gymName = 'Unknown';
-                            const gymIdentifier = userData.gymId || userData['gym-id'];
-                            if (gymIdentifier && gymMap[gymIdentifier]) {
-                                gymName = gymMap[gymIdentifier];
-                            } else if (gymIdentifier) {
-                                gymName = gymIdentifier;
-                            }
-                            
-                            // Get loyalty tier - check both formats and all possible field names
-                            const loyaltyTier = userData['loyalty-tier'] || 
-                                            userData.loyaltyTier || 
-                                            userData['loyalty_tier'] || 
-                                            (userData.loyalty ? userData.loyalty.tier : null) || 
-                                            'None';
-                            
-                            // Create leaderboard entry
-                            const entryDiv = document.createElement('div');
-                            entryDiv.className = `leaderboard-entry rank-${rank <= 3 ? rank : 'other'}`;
-                            entryDiv.style.animation = `slideIn 0.3s ease-out ${index * 0.1}s forwards`;
-                            entryDiv.style.opacity = '0';
-                            
-                            // Determine trophy icon for top 3
-                            let trophyIcon = '';
-                            if (rank === 1) trophyIcon = '🏆';
-                            else if (rank === 2) trophyIcon = '🥈';
-                            else if (rank === 3) trophyIcon = '🥉';
-                            
-                            // Create entry content
-                            entryDiv.innerHTML = `
-                                <div style="width: 30px; text-align: center; font-weight: bold; font-size: 18px;">${rank}</div>
-                                <div style="flex: 1; margin-left: 15px; font-weight: bold; font-size: 16px;">
-                                    ${userData.name || 'Anonymous'} ${trophyIcon}
-                                </div>
-                                <div style="width: 80px; text-align: center;">
-                                    <div style="font-size: 14px;">Rounds: ${userData['number-played'] || 0}</div>
-                                </div>
-                                <div style="width: 80px; text-align: center;">
-                                    <div style="font-size: 16px; font-weight: bold;">Points: ${userData.points || 0}</div>
-                                </div>
-                                <div style="width: 120px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    <div style="font-size: 14px;">${gymName}</div>
-                                </div>
-                                <div style="width: 80px; text-align: center;">
-                                    <div style="font-size: 14px;">${loyaltyTier}</div>
-                                </div>
-                            `;
-                            
-                            leaderboardContent.appendChild(entryDiv);
+                            // Create and add entry
+                            leaderboardContent.appendChild(createLeaderboardEntry(userData, index));
                         });
+                        
+                        // Update last updated text
+                        const lastUpdated = new Date();
+                        lastUpdatedText.textContent = `Last updated: ${lastUpdated.toLocaleString()}`;
                     })
-                    .catch((error) => {
+                    .catch(error => {
                         logDebug(`Error fetching leaderboard data: ${error.message}`);
-                        // If Firestore query fails, show fallback data
-                        showFallbackData();
+                        
+                        // If we have cached data, use it on error
+                        if (leaderboardCache.data) {
+                            displayCachedLeaderboard();
+                        } else {
+                            // If no cache, show fallback data
+                            showFallbackData();
+                        }
                     });
-            }
-            
-            // Fallback function to show static data matching the screenshot
-            function showFallbackData() {
-                logDebug("Using fallback data for leaderboard");
-                leaderboardContent.innerHTML = '';
-                
-                // Add the entries we see in the screenshot
-                leaderboardContent.appendChild(createStaticEntry("NaN. supermario", 7, 75, 1, "MTT 2025", "None"));
-                leaderboardContent.appendChild(createStaticEntry("NaN. BFit24", 22, 75, 2, "BFit24 Henstedt-Ulzburg", "Bronze"));
-                
-                // Add some additional entries
-                leaderboardContent.appendChild(createStaticEntry("Player 3", 5, 50, 3, "BFit24 Henstedt-Ulzburg", "Bronze"));
-                leaderboardContent.appendChild(createStaticEntry("Player 4", 4, 40, 4, "BFit24 Wahlstedt", "Bronze"));
-                leaderboardContent.appendChild(createStaticEntry("Player 5", 3, 30, 5, "Unknown", "None"));
             }
         }
         
+        // Fallback function to show static data matching the screenshot
+        function showFallbackData() {
+            logDebug("Using fallback data for leaderboard");
+            
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            if (!leaderboardContent) return;
+            
+            // Clear content and recreate header
+            leaderboardContent.innerHTML = '';
+            
+            // Recreate the header
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'leaderboard-header';
+            headerDiv.innerHTML = `
+                <div>Rank</div>
+                <div>Player</div>
+                <div>Rounds</div>
+                <div>Points</div>
+                <div>Studio</div>
+                <div>Tier</div>
+            `;
+            leaderboardContent.appendChild(headerDiv);
+            
+            // Add the entries we see in the screenshot
+            leaderboardContent.appendChild(createStaticEntry("NaN. supermario", 7, 75, 1, "MTT 2025", "None"));
+            leaderboardContent.appendChild(createStaticEntry("NaN. BFit24", 22, 75, 2, "BFit24 Henstedt-Ulzburg", "Bronze"));
+            
+            // Add some additional entries
+            leaderboardContent.appendChild(createStaticEntry("Player 3", 5, 50, 3, "BFit24 Henstedt-Ulzburg", "Bronze"));
+            leaderboardContent.appendChild(createStaticEntry("Player 4", 4, 40, 4, "BFit24 Wahlstedt", "Bronze"));
+            leaderboardContent.appendChild(createStaticEntry("Player 5", 3, 30, 5, "Unknown", "None"));
+        }
+        
         // Load leaderboard when page loads
-        window.addEventListener('DOMContentLoaded', loadLeaderboard);
+        window.addEventListener('DOMContentLoaded', displayLeaderboard);
         
         // Check for URL parameters that might indicate debug mode
         const urlParams = new URLSearchParams(window.location.search);
@@ -462,6 +663,18 @@
         } else {
             document.getElementById('debug-info').style.display = 'none';
         }
+        
+        // Setup periodic leaderboard refresh check (every 5 minutes)
+        setInterval(() => {
+            shouldRefreshLeaderboard()
+                .then(needsRefresh => {
+                    if (needsRefresh) {
+                        logDebug("Periodic check found leaderboard needs refresh");
+                        fetchAndDisplayLeaderboard();
+                    }
+                })
+                .catch(err => logDebug("Error in periodic refresh check: " + err.message));
+        }, 5 * 60 * 1000);
     </script>
 </body>
 </html> 
