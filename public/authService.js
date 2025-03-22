@@ -1,55 +1,14 @@
 // authService.js - Authentication service
 
 import { 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
   onAuthStateChanged
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, firestore } from './firebase';
-
-// Sign up with email and password
-export const signUpWithEmail = async (email, password, displayName) => {
-  try {
-    // Create the user in Firebase Authentication
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    
-    // Send email verification
-    await sendEmailVerification(user);
-    
-    // Create user profile in Firestore
-    await createUserProfile(user, { displayName });
-    
-    return user;
-  } catch (error) {
-    console.error("Error signing up with email:", error);
-    throw error;
-  }
-};
-
-// Sign in with email and password
-export const signInWithEmail = async (email, password) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    
-    // Update last login timestamp
-    const userRef = doc(firestore, 'users', userCredential.user.uid);
-    await updateDoc(userRef, {
-      lastLogin: serverTimestamp()
-    });
-    
-    return userCredential.user;
-  } catch (error) {
-    console.error("Error signing in with email:", error);
-    throw error;
-  }
-};
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
